@@ -90,7 +90,8 @@ class Item(object):
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
             # delistify attributes if there is only one value
-            params[key] = self.compact_unique_attr_value(params[key])
+            #print "NOT COMPACTING key %s and value %s" % (key, params[key])
+            #params[key] = self.compact_unique_attr_value(params[key])
             # checks for attribute value special syntax (+ or _)
             if not isinstance(params[key], list) and \
                len(params[key]) >= 1 and params[key][0] == '+':
@@ -690,6 +691,7 @@ class Items(object):
         for id in self.items:
             if hasattr(self.items[id], name_property):
                 name = getattr(self.items[id], name_property)
+                #print "name %s, item %s, id %s" % (name, self.items[id], id)
                 if name not in self.reversed_list:
                     self.reversed_list[name] = id
                 else:
@@ -742,7 +744,6 @@ class Items(object):
         for i in self:
             i.prepare_for_conf_sending()
 
-    
     # It's used to change old Nagios2 names to
     # Nagios3 ones
     def old_properties_names_to_new(self):
@@ -911,8 +912,8 @@ class Items(object):
     def linkify_with_contacts(self, contacts):
         for i in self:
             if hasattr(i, 'contacts'):
-                contacts_tab = i.contacts.split(',')
-                contacts_tab = strip_and_uniq(contacts_tab)
+                #contacts_tab = i.contacts.split(',')
+                contacts_tab = strip_and_uniq(i.contacts)
                 new_contacts = []
                 for c_name in contacts_tab:
                     if c_name != '':
@@ -931,8 +932,8 @@ class Items(object):
     def linkify_with_escalations(self, escalations):
         for i in self:
             if hasattr(i, 'escalations'):
-                escalations_tab = i.escalations.split(',')
-                escalations_tab = strip_and_uniq(escalations_tab)
+                #escalations_tab = i.escalations.split(',')
+                escalations_tab = strip_and_uniq(i.escalations)
                 new_escalations = []
                 for es_name in [e for e in escalations_tab if e != '']:
                     es = escalations.find_by_name(es_name)
@@ -947,8 +948,8 @@ class Items(object):
     def linkify_with_resultmodulations(self, resultmodulations):
         for i in self:
             if hasattr(i, 'resultmodulations'):
-                resultmodulations_tab = i.resultmodulations.split(',')
-                resultmodulations_tab = strip_and_uniq(resultmodulations_tab)
+                #resultmodulations_tab = i.resultmodulations.split(',')
+                resultmodulations_tab = strip_and_uniq(i.resultmodulations)
                 new_resultmodulations = []
                 for rm_name in resultmodulations_tab:
                     rm = resultmodulations.find_by_name(rm_name)
@@ -964,8 +965,8 @@ class Items(object):
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
             if hasattr(i, 'business_impact_modulations'):
-                business_impact_modulations_tab = i.business_impact_modulations.split(',')
-                business_impact_modulations_tab = strip_and_uniq(business_impact_modulations_tab)
+                #business_impact_modulations_tab = i.business_impact_modulations.split(',')
+                business_impact_modulations_tab = strip_and_uniq(i.business_impact_modulations)
                 new_business_impact_modulations = []
                 for rm_name in business_impact_modulations_tab:
                     rm = business_impact_modulations.find_by_name(rm_name)
@@ -1131,7 +1132,6 @@ class Items(object):
         # Maybe exp is a list, like numerous hostgroups entries in a service, link them
         if isinstance(expr, list):
             expr = '|'.join(expr)
-        #print "\n"*10, "looking for expression", expr        
         if look_in=='hostgroups':
             f = ComplexExpressionFactory(look_in, hostgroups, hosts)
         else: # templates

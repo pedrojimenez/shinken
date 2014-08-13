@@ -693,7 +693,6 @@ class Config(Item):
         # Should look at hacking command_file module first
         self.hack_old_nagios_parameters_for_arbiter()
 
-        self.modules.create_reversed_list()
 
         if len(self.arbiters) == 0:
             logger.warning("There is no arbiter, I add one in localhost:7770")
@@ -709,11 +708,14 @@ class Config(Item):
 
         #print "****************** Pythonize ******************"
         self.arbiters.pythonize()
+        #import pdb; pdb.set_trace()
+        self.modules.pythonize()
 
         #print "****************** Linkify ******************"
         self.arbiters.linkify(self.modules)
         self.modules.linkify()
 
+        self.modules.create_reversed_list()
     # We will load all triggers .trig files from all triggers_dir
     def load_triggers(self):
         for p in self.triggers_dirs:
@@ -753,7 +755,6 @@ class Config(Item):
         #print "Hostgroups"
         # link hostgroups with hosts
         self.hostgroups.linkify(self.hosts, self.realms)
-
         #print "Services"
         # link services with other objects
         self.services.linkify(self.hosts, self.commands, \
@@ -762,13 +763,11 @@ class Config(Item):
                               self.escalations, self.servicegroups, self.triggers, self.checkmodulations,
                               self.macromodulations
                               )
-
         self.servicesextinfo.merge(self.services)
 
         #print "Service groups"
         # link servicegroups members with services
         self.servicegroups.linkify(self.services)
-
         # link notificationways with timeperiods and commands
         self.notificationways.linkify(self.timeperiods, self.commands)
 
@@ -781,7 +780,6 @@ class Config(Item):
         #print "Contactgroups"
         # link contacgroups with contacts
         self.contactgroups.linkify(self.contacts)
-
         #print "Contacts"
         # link contacts with timeperiods and commands
         self.contacts.linkify(self.timeperiods, self.commands,
@@ -797,7 +795,6 @@ class Config(Item):
 
         #print "Hostdependency"
         self.hostdependencies.linkify(self.hosts, self.timeperiods)
-
         #print "Resultmodulations"
         self.resultmodulations.linkify(self.timeperiods)
 
@@ -1035,6 +1032,7 @@ class Config(Item):
 
         #print "Services"
         #print "Initially got nb of services: %d" % len(self.services.items)
+        import pdb; pdb.set_trace()
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
                               self.servicegroups, self.servicedependencies,
                               self.triggers)

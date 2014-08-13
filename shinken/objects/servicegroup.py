@@ -93,6 +93,8 @@ class Servicegroup(Itemgroup):
             if sg is not None:
                 value = sg.get_services_by_explosion(servicegroups)
                 if value is not None:
+
+                    print "ADDDING UNKNOWN: '%s'" % value
                     self.add_string_member(value)
 
         if self.has('members'):
@@ -121,6 +123,7 @@ class Servicegroups(Itemgroups):
             seek = 0
             host_name = ''
             if (len(mbrs) == 1):
+                import pdb; pdb.set_trace()
                 sg.add_string_unknown_member('%s' % mbrs[0])
 
             for mbr in mbrs:
@@ -132,6 +135,7 @@ class Servicegroups(Itemgroups):
                     if find is not None:
                         new_mbrs.append(find)
                     else:
+                        import pdb; pdb.set_trace()
                         sg.add_string_unknown_member('%s,%s' % (host_name, service_desc))
                 seek += 1
 
@@ -148,6 +152,7 @@ class Servicegroups(Itemgroups):
     # Add a service string to a service member
     # if the service group do not exist, create it
     def add_member(self, cname, sgname):
+        import pdb; pdb.set_trace()
         sg = self.find_by_name(sgname)
         # if the id do not exist, create the cg
         if sg is None:

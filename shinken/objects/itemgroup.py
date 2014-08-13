@@ -30,7 +30,7 @@
 from item import Item, Items
 
 from shinken.brok import Brok
-from shinken.property import StringProp
+from shinken.property import StringProp, ListProp
 from shinken.log import logger
 
 
@@ -41,9 +41,9 @@ class Itemgroup(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'members': StringProp(fill_brok=['full_status']),
+        'members': ListProp(fill_brok=['full_status'], default=None),
         # Shinken specific
-        'unknown_members': StringProp(default=None),
+        'unknown_members': ListProp(default=None),
     })
 
     def __init__(self, params={}):
@@ -103,9 +103,9 @@ class Itemgroup(Item):
 
     def add_string_member(self, member):
         if hasattr(self, 'members'):
-            self.members += ',' + member
+            self.members.append(member)
         else:
-            self.members = member
+            self.members = [member]
 
     def add_string_unknown_member(self, member):
         if self.unknown_members:
