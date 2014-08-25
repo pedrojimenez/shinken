@@ -102,16 +102,16 @@ class Itemgroup(Item):
                 setattr(self, prop, value)
 
     def add_string_member(self, member):
-        if hasattr(self, 'members'):
-            self.members.append(member)
-        else:
-            self.members = [member]
+        add_fun = list.extend if isinstance(member, list) else list.append
+        if not self.members:
+            self.members = []
+        add_fun(self.members, member)
 
     def add_string_unknown_member(self, member):
-        if self.unknown_members:
-            self.unknown_members.append(member)
-        else:
-            self.unknown_members = [member]
+        add_fun = list.extend if isinstance(member, list) else list.append
+        if not self.unknown_members:
+            self.unknown_members = []
+        add_fun(self.unknown_members, member)
 
     def __str__(self):
         return str(self.__dict__) + '\n'

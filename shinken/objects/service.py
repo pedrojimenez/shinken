@@ -420,6 +420,7 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
+                    import pdb;pdb.set_trace()
                     logger.error("The service %s on host '%s' does not have %s", desc, hname, prop)
                     state = False  # Bad boy...
 
@@ -1392,7 +1393,7 @@ class Services(Items):
                 if hasattr(s, 'servicegroups'):
                     sgs = s.servicegroups.split(',')
                     for sg in sgs:
-                        servicegroups.add_member(shname+','+sname, sg.strip())
+                        servicegroups.add_member([shname, sname], sg.strip())
 
 
         # Now we explode service_dependencies into Servicedependency

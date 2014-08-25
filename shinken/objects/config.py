@@ -708,7 +708,7 @@ class Config(Item):
 
         #print "****************** Pythonize ******************"
         self.arbiters.pythonize()
-        #import pdb; pdb.set_trace()
+
         self.modules.pythonize()
 
         #print "****************** Linkify ******************"
@@ -957,7 +957,6 @@ class Config(Item):
             self.whole_conf_pack = whole_queue.pop()
             logger.debug("[config] time to serialize the global conf : %s", time.time() - t0)
 
-            print "TOTAL serializing iin", time.time() - t2
             # Shutdown the manager, the sub-process should be gone now
             m.shutdown()
 
@@ -1032,7 +1031,7 @@ class Config(Item):
 
         #print "Services"
         #print "Initially got nb of services: %d" % len(self.services.items)
-        import pdb; pdb.set_trace()
+
         self.services.explode(self.hosts, self.hostgroups, self.contactgroups,
                               self.servicegroups, self.servicedependencies,
                               self.triggers)

@@ -54,6 +54,7 @@ class TestAcks(ShinkenTest):
         #   master notification and contact notification
         #--------------------------------------------------------------
         print "- 2 x BAD get hard -------------------------------------"
+        import pdb;pdb.set_trace()
         self.scheduler_loop(2, [[svc, 2, 'BAD']])
         self.assert_(svc.current_notification_number == 1)
         self.assert_(self.count_actions() == 3)

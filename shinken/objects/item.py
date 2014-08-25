@@ -57,7 +57,7 @@ class Item(object):
         'name':                     StringProp(default=''),
         'definition_order':         IntegerProp(default='100'),
         # TODO: find why we can't uncomment this line below.
-        #'register':                 BoolProp(default='1'),
+        'register':                 BoolProp(default='1'),
     }
 
     running_properties = {
@@ -93,21 +93,21 @@ class Item(object):
             #print "NOT COMPACTING key %s and value %s" % (key, params[key])
             #params[key] = self.compact_unique_attr_value(params[key])
             # checks for attribute value special syntax (+ or _)
-            if not isinstance(params[key], list) and \
-               len(params[key]) >= 1 and params[key][0] == '+':
+            if len(params[key]) == 1 and \
+               len(params[key][0]) >= 1 and params[key][0][0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
-                    self.plus[key.upper()] = params[key][1:]  # we remove the +
+                    self.plus[key.upper()] = params[key][0][1:]  # we remove the +
                 else:
-                    self.plus[key] = params[key][1:]  # we remove the +
+                    self.plus[key] = params[key][0][1:]  # we remove the +
             elif key[0] == "_":
-                if isinstance(params[key], list):
+                if len(params[key]) > 1:
                     err = "no support for _ syntax in multiple valued attributes"
                     self.configuration_errors.append(err)
                     continue
                 custom_name = key.upper()
-                self.customs[custom_name] = params[key]
+                self.customs[custom_name] = params[key][0]
             else:
                 setattr(self, key, params[key])
 
@@ -164,7 +164,7 @@ Like temporary attributes such as "imported_from", etc.. """
     def is_tpl(self):
         """ Return if the elements is a template """
         try:
-            return self.register == '0'
+            return not self.register
         except Exception, exp:
             return False
 
@@ -205,7 +205,10 @@ Like temporary attributes such as "imported_from", etc.. """
     # Use to make python properties
     def pythonize(self):
         cls = self.__class__
+        #print cls
+        #if cls.__name__ =='Service': import pdb; pdb.set_trace()
         for prop, tab in cls.properties.items():
+            #if prop == 'check_interval': import pdb; pdb.set_trace()
             try:
                 new_val = tab.pythonize(getattr(self, prop))
                 setattr(self, prop, new_val)
@@ -1190,7 +1193,7 @@ class Items(object):
 
             # Ok, even with all of it, there is still no host, put it as a template
             if i.host_name == '':
-                i.register = '0'
+                i.register = False
 
 
     # Take our trigger strings and create true objects with it

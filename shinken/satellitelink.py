@@ -50,7 +50,7 @@ class SatelliteLink(Item):
         'data_timeout':    IntegerProp(default='120', fill_brok=['full_status']),
         'check_interval':  IntegerProp(default='60', fill_brok=['full_status']),
         'max_check_attempts': IntegerProp(default='3', fill_brok=['full_status']),
-        'spare':              BoolProp(default='0', fill_brok=['full_status']),
+        'spare':              BoolProp(default=False, fill_brok=['full_status']),
         'manage_sub_realms':  BoolProp(default='1', fill_brok=['full_status']),
         'manage_arbiters':    BoolProp(default='0', fill_brok=['full_status'], to_send=True),
         'modules':            ListProp(default='', to_send=True),

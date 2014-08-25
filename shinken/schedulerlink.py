@@ -40,7 +40,7 @@ class SchedulerLink(SatelliteLink):
     properties.update({
         'scheduler_name':     StringProp(fill_brok=['full_status']),
         'port':               IntegerProp(default='7768', fill_brok=['full_status']),
-        'weight':             IntegerProp(default='1', fill_brok=['full_status']),
+        'weight':             IntegerProp(default=1, fill_brok=['full_status']),
         'skip_initial_broks': BoolProp(default='0', fill_brok=['full_status']),
         'accept_passive_unknown_check_results': BoolProp(default='0', fill_brok=['full_status']),
     })
