@@ -161,6 +161,9 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf = Config()
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
+        import pdb
+        pdb.set_trace()
+        self.conf.pythonize(Config, raw_objects)
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
         self.conf.early_arbiter_linking()
@@ -171,8 +174,8 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         # Hack push_flavor, that is set by the dispatcher
         self.conf.push_flavor = 0
         self.conf.load_triggers()
-        import pdb
-        self.conf.pythonize()
+
+
         self.conf.linkify_templates()
         self.conf.apply_inheritance()
         self.conf.explode()
