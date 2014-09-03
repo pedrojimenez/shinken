@@ -80,15 +80,15 @@ class Itemgroup(Item):
     # Change the members like item1 ,item2 to ['item1' , 'item2']
     # so a python list :)
     # We also strip elements because spaces Stinks!
-    def pythonize(self):
-        v =  getattr(self, 'members', '')
-        # Maybe it's a multi-property like multi hostgroups entries
-        # if so "flatten" it
-        if isinstance(v, list):
-            v = ','.join(v)
-        self.members = [mbr for mbr in
-                            (m.strip() for m in v.split(','))
-                        if mbr != '']
+    #def pythonize(self):
+    #    v =  getattr(self, 'members', '')
+    #    # Maybe it's a multi-property like multi hostgroups entries
+    #    # if so "flatten" it
+    #    if isinstance(v, list):
+    #        v = ','.join(v)
+    #    self.members = [mbr for mbr in
+    #                        (m.strip() for m in v.split(','))
+    #                    if mbr != '']
 
     def replace_members(self, members):
         self.members = members

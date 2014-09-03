@@ -96,9 +96,9 @@ class Command(Item):
     def get_name(self):
         return self.command_name
 
-    def pythonize(self):
-        self.command_name = self.command_name.strip()
-        self.timeout = int(self.timeout)
+    #def pythonize(self):
+    #    self.command_name = self.command_name.strip()
+    #    self.timeout = int(self.timeout)
 
     def __str__(self):
         return str(self.__dict__)

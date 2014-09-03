@@ -401,20 +401,33 @@ class Config(Item):
             properties['$' + macro_name + '$'] = StringProp(default='')
             macros[macro_name] = '$' + macro_name + '$'
 
-    def load_params(self, params):
+    def clean_params(self, params):
+        clean_p = {}
         for elt in params:
             elts = elt.split('=', 1)
             if len(elts) == 1:  # error, there is no = !
                 self.conf_is_correct = False
                 logger.error("[config] the parameter %s is malformed! (no = sign)", elts[0])
+            elif elts[1] == '':
+                self.conf_is_correct = False
+                logger.error("[config] the parameter %s is malformed! (no value after =)", elts[0])
             else:
-                self.params[elts[0]] = elts[1]
-                setattr(self, elts[0], elts[1])
+                clean_p[elts[0]] = elts[1]
+
+        return clean_p
+
+
+    def load_params(self, params):
+        var = self.clean_params(params)
+        self.params = Item.pythonize(Config, var)
+
+        for key, value in self.params:
+                setattr(self, key, value)
                 # Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
                 # so look at the first character. If it's a $, it's a variable
                 # and if it's end like it too
-                if elts[0][0] == '$' and elts[0][-1] == '$':
-                    macro_name = elts[0][1:-1]
+                if key[0] == '$' and key[-1] == '$':
+                    macro_name = key[1:-1]
                     self.resource_macros_names.append(macro_name)
 
     def _cut_line(self, line):
@@ -612,6 +625,7 @@ class Config(Item):
         objects = {}
 
         #print "Params", params
+        import pdb; pdb.set_trace()
         self.load_params(params)
         # And then update our MACRO dict
         self.fill_resource_macros_names_macros()
@@ -683,6 +697,9 @@ class Config(Item):
             lst.append(o)
         # we create the objects Class and we set it in prop
         setattr(self, prop, clss(lst))
+
+
+
 
 
     # Here arbiter and modules objects should be prepare and link
@@ -1583,35 +1600,45 @@ class Config(Item):
 
 
     # We've got strings (like 1) but we want python elements, like True
-    def pythonize(self):
+    @staticmethod
+    def pythonize(mycls, raw_config):
         # call item pythonize for parameters
-        super(Config, self).pythonize()
-        self.hosts.pythonize()
-        self.hostgroups.pythonize()
-        self.hostdependencies.pythonize()
-        self.contactgroups.pythonize()
-        self.contacts.pythonize()
-        self.notificationways.pythonize()
-        self.checkmodulations.pythonize()
-        self.macromodulations.pythonize()
-        self.servicegroups.pythonize()
-        self.services.pythonize()
-        self.servicedependencies.pythonize()
-        self.resultmodulations.pythonize()
-        self.businessimpactmodulations.pythonize()
-        self.escalations.pythonize()
-        self.discoveryrules.pythonize()
-        self.discoveryruns.pythonize()
-        self.hostescalations.pythonize()
-        self.serviceescalations.pythonize()
+        to_pythonize = mycls.types_creations
+
+        for t in to_pythonize:
+            for dict_item in raw_config[t]:
+                # Index 0 is the Object
+                # Example Host.pythonize(Host, {"host_name": ["myhostname"], ...})
+                cls = to_pythonize[t][0]
+                cls.pythonize(cls, dict_item)
+
+
+        #self.hosts.pythonize()
+        #self.hostgroups.pythonize()
+        #self.hostdependencies.pythonize()
+        #self.contactgroups.pythonize()
+        #self.contacts.pythonize()
+        #self.notificationways.pythonize()
+        #self.checkmodulations.pythonize()
+        #self.macromodulations.pythonize()
+        #self.servicegroups.pythonize()
+        #self.services.pythonize()
+        #self.servicedependencies.pythonize()
+        #self.resultmodulations.pythonize()
+        #self.businessimpactmodulations.pythonize()
+        #self.escalations.pythonize()
+        #self.discoveryrules.pythonize()
+        #self.discoveryruns.pythonize()
+        #self.hostescalations.pythonize()
+        #self.serviceescalations.pythonize()
         # The arbiters are already done
         # self.arbiters.pythonize()
-        self.schedulers.pythonize()
-        self.realms.pythonize()
-        self.reactionners.pythonize()
-        self.pollers.pythonize()
-        self.brokers.pythonize()
-        self.receivers.pythonize()
+        #self.schedulers.pythonize()
+        #self.realms.pythonize()
+        #self.reactionners.pythonize()
+        #self.pollers.pythonize()
+        #self.brokers.pythonize()
+        #self.receivers.pythonize()
 
     # Explode parameters like cached_service_check_horizon in the
     # Service class in a cached_check_horizon manner, o*hp commands

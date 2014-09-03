@@ -203,26 +203,35 @@ Like temporary attributes such as "imported_from", etc.. """
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
 
-    # Use to make python properties
-    def pythonize(self):
-        cls = self.__class__
-        #print cls
+    @staticmethod
+    def pythonize(cls, dict_item):
+        """ We want to create instance of object with the good type.
+        Here we've just parsed config files so everything is a list.
+        We use the pythonize method to get the good type.
+        """
+
         #if cls.__name__ =='Service': import pdb; pdb.set_trace()
         for prop, tab in cls.properties.items():
-            if prop == 'service_description' and cls.__name__ =='Serviceescalation': import pdb; pdb.set_trace()
+            #if prop == 'service_description' and cls.__name__ =='Serviceescalation': import pdb; pdb.set_trace()
             try:
-                new_val = tab.pythonize(getattr(self, prop))
-                setattr(self, prop, new_val)
+                new_val = tab.pythonize(dict_item[prop])
+                dict_item[prop] = new_val
             except AttributeError, exp:
                 #print exp
                 pass  # Will be catch at the is_correct moment
             except KeyError, exp:
                 #print "Missing prop value", exp
-                err = "the property '%s' of '%s' do not have value" % (prop, self.get_name())
-                self.configuration_errors.append(err)
+                err = "the property '%s' of '%s' do not have value" % (prop, cls.get_name())
+                if hasattr(dict_item, "configuration_errors"):
+                    dict_item["configuration_errors"].append(err)
+                else:
+                    dict_item["configuration_errors"] = [err]
             except ValueError, exp:
-                err = "incorrect type for property '%s' of '%s'" % (prop, self.get_name())
-                self.configuration_errors.append(err)
+                err = "incorrect type for property '%s' of '%s'" % (prop, cls.get_name())
+                if hasattr(dict_item, "configuration_errors"):
+                    dict_item["configuration_errors"].append(err)
+                else:
+                    dict_item["configuration_errors"] = [err]
 
     # Compute a hash of this element values. Should be launched
     # When we got all our values, but not linked with other objects

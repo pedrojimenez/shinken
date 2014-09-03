@@ -123,6 +123,9 @@ class Property(object):
         self.merging = merging
         self.split_on_coma = split_on_coma
 
+    def pythonize(self, val):
+        return val
+
 
 class UnusedProp(Property):
     """A unused Property. These are typically used by Nagios but
