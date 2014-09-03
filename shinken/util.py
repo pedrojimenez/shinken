@@ -249,6 +249,13 @@ def to_split(val, split_on_coma=True):
         val = []
     return val
 
+def list_split(val, split_on_coma=True):
+    if not split_on_coma:
+        return val
+    new_val = []
+    _ = map(lambda x: new_val.extend(x.split(',')), val)
+    return new_val
+
 
 def to_best_int_float(val):
     i = int(float(val))

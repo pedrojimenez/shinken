@@ -41,7 +41,7 @@ class Resultmodulation(Item):
     properties = Item.properties.copy()
     properties.update({
         'resultmodulation_name': StringProp(),
-        'exit_codes_match':      ListProp(default=''),
+        'exit_codes_match':      ListProp(default=['']),
         'exit_code_modulation':  StringProp(default=None),
         'modulation_period':     StringProp(default=None),
     })

@@ -53,11 +53,11 @@ class Item(object):
 
     properties = {
         'imported_from':            StringProp(default='unknown'),
-        'use':                      ListProp(default=''),
+        'use':                      ListProp(default=None),
         'name':                     StringProp(default=''),
-        'definition_order':         IntegerProp(default='100'),
+        'definition_order':         IntegerProp(default=100),
         # TODO: find why we can't uncomment this line below.
-        'register':                 BoolProp(default='1'),
+        'register':                 BoolProp(default=True),
     }
 
     running_properties = {
@@ -92,6 +92,7 @@ class Item(object):
             # delistify attributes if there is only one value
             #print "NOT COMPACTING key %s and value %s" % (key, params[key])
             #params[key] = self.compact_unique_attr_value(params[key])
+            #if key == 'max_check_attempts': import pdb;pdb.set_trace()
             # checks for attribute value special syntax (+ or _)
             if len(params[key]) == 1 and \
                len(params[key][0]) >= 1 and params[key][0][0] == '+':
@@ -208,7 +209,7 @@ Like temporary attributes such as "imported_from", etc.. """
         #print cls
         #if cls.__name__ =='Service': import pdb; pdb.set_trace()
         for prop, tab in cls.properties.items():
-            #if prop == 'check_interval': import pdb; pdb.set_trace()
+            if prop == 'service_description' and cls.__name__ =='Serviceescalation': import pdb; pdb.set_trace()
             try:
                 new_val = tab.pythonize(getattr(self, prop))
                 setattr(self, prop, new_val)
@@ -277,7 +278,7 @@ Like temporary attributes such as "imported_from", etc.. """
             if value is not None:
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
-                if not isinstance(value, list) and value.startswith('+'):
+                if isinstance(value, str) and value.startswith('+'):
                     # Templates should keep their + inherited from their parents
                     if not self.is_tpl():
                         value = value[1:]
@@ -688,6 +689,7 @@ class Items(object):
     # We also create a twins list with id of twins (not the original
     # just the others, higher twins)
     def create_reversed_list(self):
+        #if self.__class__.__name__ == 'Hosts': import pdb; pdb.set_trace()
         self.reversed_list = {}
         self.twins = []
         name_property = self.__class__.name_property
@@ -699,6 +701,8 @@ class Items(object):
                     self.reversed_list[name] = id
                 else:
                     self.twins.append(id)
+
+        #if self.__class__.__name__ == 'Hosts': import pdb; pdb.set_trace()
 
 
     def find_id_by_name(self, name):
@@ -884,6 +888,8 @@ class Items(object):
         # if not, it check all host templates for a value
         cls = self.inner_class
         for prop in cls.properties:
+            if prop == 'register':
+                continue  #We do not want to inherit this prop
             self.apply_partial_inheritance(prop)
         for i in self:
             i.get_customs_properties_by_inheritance(self)

@@ -76,29 +76,29 @@ class Host(SchedulingItem):
         'max_check_attempts':   IntegerProp(default=1,fill_brok=['full_status']),
         'check_interval':       IntegerProp(default=0, fill_brok=['full_status']),
         'retry_interval':       IntegerProp(default=0, fill_brok=['full_status']),
-        'active_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'passive_checks_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
+        'active_checks_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'passive_checks_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'check_period':         StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'obsess_over_host':     BoolProp(default='0', fill_brok=['full_status'], retention=True),
-        'check_freshness':      BoolProp(default='0', fill_brok=['full_status']),
-        'freshness_threshold':  IntegerProp(default='0', fill_brok=['full_status']),
+        'obsess_over_host':     BoolProp(default=False, fill_brok=['full_status'], retention=True),
+        'check_freshness':      BoolProp(default=False, fill_brok=['full_status']),
+        'freshness_threshold':  IntegerProp(default=0, fill_brok=['full_status']),
         'event_handler':        StringProp(default='', fill_brok=['full_status']),
-        'event_handler_enabled': BoolProp(default='0', fill_brok=['full_status']),
+        'event_handler_enabled': BoolProp(default=False, fill_brok=['full_status']),
         'low_flap_threshold':   IntegerProp(default=25, fill_brok=['full_status']),
         'high_flap_threshold':  IntegerProp(default=50, fill_brok=['full_status']),
-        'flap_detection_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'flap_detection_options': ListProp(default='o,d,u', fill_brok=['full_status'], merging='join'),
-        'process_perf_data':    BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'retain_status_information': BoolProp(default='1', fill_brok=['full_status']),
-        'retain_nonstatus_information': BoolProp(default='1', fill_brok=['full_status']),
-        'contacts':             StringProp(default='', brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
-        'contact_groups':       StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'flap_detection_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'flap_detection_options': StringProp(default='o,d,u', fill_brok=['full_status'], merging='join'),
+        'process_perf_data':    BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
+        'retain_nonstatus_information': BoolProp(default=True, fill_brok=['full_status']),
+        'contacts':             ListProp(default=[], brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
+        'contact_groups':       ListProp(default=[], fill_brok=['full_status'], merging='join'),
         'notification_interval': IntegerProp(default=60, fill_brok=['full_status']),
         'first_notification_delay': IntegerProp(default=0, fill_brok=['full_status']),
         'notification_period':  StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options': ListProp(default='d,u,r,f', fill_brok=['full_status'], merging='join'),
-        'notifications_enabled': BoolProp(default='1', fill_brok=['full_status'], retention=True),
-        'stalking_options':     ListProp(default='', fill_brok=['full_status']),
+        'notification_options': StringProp(default='d,u,r,f', fill_brok=['full_status'], merging='join'),
+        'notifications_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'stalking_options':     StringProp(default='', fill_brok=['full_status']),
         'notes':                StringProp(default='', fill_brok=['full_status']),
         'notes_url':            StringProp(default='', fill_brok=['full_status']),
         'action_url':           StringProp(default='', fill_brok=['full_status']),
@@ -112,7 +112,7 @@ class Host(SchedulingItem):
         # it's stupid!
         '2d_coords':            StringProp(default='', fill_brok=['full_status'], no_slots=True),
         '3d_coords':            StringProp(default='', fill_brok=['full_status'], no_slots=True),
-        'failure_prediction_enabled': BoolProp(default='0', fill_brok=['full_status']),
+        'failure_prediction_enabled': BoolProp(default=False, fill_brok=['full_status']),
 
         ### New to shinken
         # 'fill_brok' is ok because in scheduler it's already
@@ -124,7 +124,7 @@ class Host(SchedulingItem):
         'business_impact_modulations': StringProp(default='', merging='join'),
         'escalations':          StringProp(default='', fill_brok=['full_status'], merging='join'),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'time_to_orphanage':    IntegerProp(default='300', fill_brok=['full_status']),
+        'time_to_orphanage':    IntegerProp(default=300, fill_brok=['full_status']),
         'service_overrides':    ListProp(default='', merging='duplicate', split_on_coma=False),
         'service_excludes':     ListProp(default='', merging='duplicate'),
         'labels':               ListProp(default='', fill_brok=['full_status'], merging='join'),
@@ -133,30 +133,30 @@ class Host(SchedulingItem):
         # Business rules output format template
         'business_rule_output_template': StringProp(default='', fill_brok=['full_status']),
         # Business rules notifications mode
-        'business_rule_smart_notifications': BoolProp(default='0', fill_brok=['full_status']),
+        'business_rule_smart_notifications': BoolProp(default=False, fill_brok=['full_status']),
         # Treat downtimes as acknowledgements in smart notifications
-        'business_rule_downtime_as_ack': BoolProp(default='0', fill_brok=['full_status']),
+        'business_rule_downtime_as_ack': BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
-        'business_rule_host_notification_options':    ListProp(default='', fill_brok=['full_status']),
-        'business_rule_service_notification_options': ListProp(default='', fill_brok=['full_status']),
+        'business_rule_host_notification_options':    ListProp(default=[''], fill_brok=['full_status']),
+        'business_rule_service_notification_options': ListProp(default=[''], fill_brok=['full_status']),
 
         # Business impact value
-        'business_impact':      IntegerProp(default='2', fill_brok=['full_status']),
+        'business_impact':      IntegerProp(default=2, fill_brok=['full_status']),
 
         # Load some triggers
         'trigger':         StringProp(default=''),
-        'trigger_name':    ListProp(default=''),
-        'trigger_broker_raise_enabled': BoolProp(default='0'),
+        'trigger_name':    StringProp(default=''),
+        'trigger_broker_raise_enabled': BoolProp(default=False),
 
         # Trending
-        'trending_policies':    ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'trending_policies':    ListProp(default=[], fill_brok=['full_status'], merging='join'),
 
         # Our modulations. By defualt void, but will filled by an inner if need
-        'checkmodulations':       ListProp(default='', fill_brok=['full_status'], merging='join'),
-        'macromodulations':       ListProp(default='', merging='join'),
+        'checkmodulations':       ListProp(default=[], fill_brok=['full_status'], merging='join'),
+        'macromodulations':       ListProp(default=[], merging='join'),
 
         # Custom views
-        'custom_views'     :    ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'custom_views'     :    ListProp(default=[], fill_brok=['full_status'], merging='join'),
     })
 
     # properties set only for running purpose
@@ -1174,7 +1174,7 @@ class Hosts(Items):
                 if not hasattr(h, 'host_name') or h.is_tpl():
                     continue
                 # Manually lookup for the templates defines in use
-                tnames = strip_and_uniq(getattr(h, 'use', '').split(','))
+                tnames = strip_and_uniq(getattr(h, 'use', ''))
                 if tpl_name in tnames:
                     res.add(h.host_name)
 

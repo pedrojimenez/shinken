@@ -51,8 +51,8 @@ class Command(Item):
         'poller_tag':   StringProp(default='None'),
         'reactionner_tag':   StringProp(default='None'),
         'module_type':  StringProp(default=None),
-        'timeout':      IntegerProp(default='-1'),
-        'enable_environment_macros': BoolProp(default=0),
+        'timeout':      IntegerProp(default=-1),
+        'enable_environment_macros': BoolProp(default=False),
     })
 
     def __init__(self, params={}):

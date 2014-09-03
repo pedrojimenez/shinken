@@ -26,9 +26,10 @@
 from itemgroup import Itemgroup, Itemgroups
 
 from shinken.util import get_obj_name
-from shinken.property import StringProp
+from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
 
+import pdb
 
 class Hostgroup(Itemgroup):
     id = 1  # zero is always a little bit special... like in database
@@ -36,7 +37,7 @@ class Hostgroup(Itemgroup):
 
     properties = Itemgroup.properties.copy()
     properties.update({
-        'id':             StringProp(default=0, fill_brok=['full_status']),
+        'id':             IntegerProp(default=0, fill_brok=['full_status']),
         'hostgroup_name': StringProp(fill_brok=['full_status']),
         'alias':          StringProp(fill_brok=['full_status']),
         'notes':          StringProp(default='', fill_brok=['full_status']),

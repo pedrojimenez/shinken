@@ -49,9 +49,9 @@ class Hostdependency(Item):
         'dependent_hostgroup_name':      StringProp(default=''),
         'host_name':                     StringProp(),
         'hostgroup_name':                StringProp(default=''),
-        'inherits_parent':               BoolProp(default='0'),
-        'execution_failure_criteria':    ListProp(default='n'),
-        'notification_failure_criteria': ListProp(default='n'),
+        'inherits_parent':               BoolProp(default=False),
+        'execution_failure_criteria':    ListProp(default=['n']),
+        'notification_failure_criteria': ListProp(default=['n']),
         'dependency_period':             StringProp(default='')
     })
 

@@ -25,7 +25,7 @@
 
 from itemgroup import Itemgroup, Itemgroups
 
-from shinken.property import StringProp
+from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
 
 
@@ -35,7 +35,7 @@ class Servicegroup(Itemgroup):
 
     properties = Itemgroup.properties.copy()
     properties.update({
-        'id':                StringProp(default=0, fill_brok=['full_status']),
+        'id':                IntegerProp(default=0, fill_brok=['full_status']),
         'servicegroup_name': StringProp(fill_brok=['full_status']),
         'alias':             StringProp(fill_brok=['full_status']),
         'notes':             StringProp(default='', fill_brok=['full_status']),

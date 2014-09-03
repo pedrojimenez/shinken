@@ -40,9 +40,9 @@ class Serviceescalation(Item):
         'service_description':   StringProp(),
         'first_notification':    IntegerProp(),
         'last_notification':     IntegerProp(),
-        'notification_interval': IntegerProp(default='30'), # like Nagios value
+        'notification_interval': IntegerProp(default=30), # like Nagios value
         'escalation_period':     StringProp(default=''),
-        'escalation_options':    ListProp(default='d,u,r,w,c'),
+        'escalation_options':    StringProp(default='d,u,r,w,c'),
         'contacts':              StringProp(),
         'contact_groups':        StringProp(),
         'first_notification_time': IntegerProp(),
@@ -69,5 +69,6 @@ class Serviceescalations(Items):
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
             #print "Creation an escalation with:", creation_dict
+            import pdb; pdb.set_trace()
             s = Escalation(creation_dict)
             escalations.add_escalation(s)

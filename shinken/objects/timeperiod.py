@@ -108,12 +108,12 @@ class Timeperiod(Item):
         'timeperiod_name':  StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='', fill_brok=['full_status']),
         'use':              StringProp(default=''),
-        'register':         IntegerProp(default='1'),
+        'register':         IntegerProp(default=1),
 
         # These are needed if a broker module calls methods on timeperiod objects
         'dateranges':       ListProp(fill_brok=['full_status'], default=[]),
         'exclude':          ListProp(fill_brok=['full_status'], default=[]),
-        'is_active':        BoolProp(default='0')
+        'is_active':        BoolProp(default=False)
     })
     running_properties = Item.running_properties.copy()
 

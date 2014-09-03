@@ -237,7 +237,8 @@ class DictProp(Property):
 
         if not elts_prop is None and not issubclass(elts_prop, Property):
             raise TypeError("DictProp constructor only accept Property sub-classes as elts_prop parameter")
-        self.elts_prop = elts_prop()
+        if elts_prop is not None:
+            self.elts_prop = elts_prop()
 
     def pythonize(self, val):
         val = unique_value(val)
@@ -255,6 +256,9 @@ class DictProp(Property):
 
         if val is None:
             return(dict())
+
+        if self.elts_prop is None:
+            return val
 
         # val is in the form "key1=addr:[port],key2=addr:[port],..."
         print ">>>", dict([split(kv) for kv in to_split(val)])
