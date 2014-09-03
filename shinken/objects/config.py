@@ -421,7 +421,7 @@ class Config(Item):
         var = self.clean_params(params)
         self.params = Item.pythonize(Config, var)
 
-        for key, value in self.params:
+        for key, value in self.params.items():
                 setattr(self, key, value)
                 # Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
                 # so look at the first character. If it's a $, it's a variable
@@ -724,9 +724,9 @@ class Config(Item):
         self.modules.fill_default()
 
         #print "****************** Pythonize ******************"
-        self.arbiters.pythonize()
+        #self.arbiters.pythonize()
 
-        self.modules.pythonize()
+        #self.modules.pythonize()
 
         #print "****************** Linkify ******************"
         self.arbiters.linkify(self.modules)
@@ -1665,15 +1665,15 @@ class Config(Item):
     # if they changed or not between the restart
     def compute_hash(self):
         self.hosts.compute_hash()
-        self.contacts.pythonize()
-        self.notificationways.pythonize()
-        self.checkmodulations.pythonize()
-        self.services.pythonize()
-        self.resultmodulations.pythonize()
-        self.businessimpactmodulations.pythonize()
-        self.escalations.pythonize()
-        self.discoveryrules.pythonize()
-        self.discoveryruns.pythonize()
+        #self.contacts.pythonize()
+        #self.notificationways.pythonize()
+        #self.checkmodulations.pythonize()
+        #self.services.pythonize()
+        #self.resultmodulations.pythonize()
+        #self.businessimpactmodulations.pythonize()
+        #self.escalations.pythonize()
+        #self.discoveryrules.pythonize()
+        #self.discoveryruns.pythonize()
 
     # Add an error in the configuration error list so we can print them
     # all in one place

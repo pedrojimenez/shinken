@@ -103,7 +103,7 @@ class Itemgroup(Item):
 
     def add_string_member(self, member):
         add_fun = list.extend if isinstance(member, list) else list.append
-        if not self.members:
+        if not hasattr(self, "members"):
             self.members = []
         add_fun(self.members, member)
 

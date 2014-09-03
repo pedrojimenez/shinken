@@ -89,21 +89,17 @@ class Item(object):
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
-            # delistify attributes if there is only one value
-            #print "NOT COMPACTING key %s and value %s" % (key, params[key])
-            #params[key] = self.compact_unique_attr_value(params[key])
-            #if key == 'max_check_attempts': import pdb;pdb.set_trace()
             # checks for attribute value special syntax (+ or _)
-            if len(params[key]) == 1 and \
-               len(params[key][0]) >= 1 and params[key][0][0] == '+':
+            if isinstance(params[key], str) and \
+               len(params[key]) >= 1 and params[key][0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
-                    self.plus[key.upper()] = params[key][0][1:]  # we remove the +
+                    self.plus[key.upper()] = params[key][1:]  # we remove the +
                 else:
-                    self.plus[key] = params[key][0][1:]  # we remove the +
+                    self.plus[key] = params[key][1:]  # we remove the +
             elif key[0] == "_":
-                if len(params[key]) > 1:
+                if isinstance(params[key], list):
                     err = "no support for _ syntax in multiple valued attributes"
                     self.configuration_errors.append(err)
                     continue
@@ -212,26 +208,22 @@ Like temporary attributes such as "imported_from", etc.. """
 
         #if cls.__name__ =='Service': import pdb; pdb.set_trace()
         for prop, tab in cls.properties.items():
-            #if prop == 'service_description' and cls.__name__ =='Serviceescalation': import pdb; pdb.set_trace()
+            #if prop == 'members' and cls.__name__ =='Hostgroup': import pdb; pdb.set_trace()
             try:
-                new_val = tab.pythonize(dict_item[prop])
-                dict_item[prop] = new_val
-            except AttributeError, exp:
-                #print exp
-                pass  # Will be catch at the is_correct moment
+                new_val = dict_item[prop]
+                dict_item[prop] = tab.pythonize(new_val)
+
             except KeyError, exp:
-                #print "Missing prop value", exp
-                err = "the property '%s' of '%s' do not have value" % (prop, cls.get_name())
-                if hasattr(dict_item, "configuration_errors"):
-                    dict_item["configuration_errors"].append(err)
-                else:
-                    dict_item["configuration_errors"] = [err]
+                pass  # Catch it later
             except ValueError, exp:
                 err = "incorrect type for property '%s' of '%s'" % (prop, cls.get_name())
                 if hasattr(dict_item, "configuration_errors"):
                     dict_item["configuration_errors"].append(err)
                 else:
                     dict_item["configuration_errors"] = [err]
+
+        return dict_item
+
 
     # Compute a hash of this element values. Should be launched
     # When we got all our values, but not linked with other objects

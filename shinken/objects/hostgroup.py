@@ -119,7 +119,7 @@ class Hostgroups(Itemgroups):
             mbrs = hg.get_hosts()
             # The new member list, in id
             new_mbrs = []
-
+            import pdb; pdb.set_trace()
             for mbr in mbrs:
                 if mbr == '*':
                     new_mbrs.extend(hosts)
