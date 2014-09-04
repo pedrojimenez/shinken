@@ -90,6 +90,7 @@ class Item(object):
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
             # checks for attribute value special syntax (+ or _)
+
             if isinstance(params[key], str) and \
                len(params[key]) >= 1 and params[key][0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
@@ -100,6 +101,7 @@ class Item(object):
                     self.plus[key] = params[key][1:]  # we remove the +
             elif key[0] == "_":
                 if isinstance(params[key], list):
+                    import pdb;pdb.set_trace()
                     err = "no support for _ syntax in multiple valued attributes"
                     self.configuration_errors.append(err)
                     continue
@@ -208,7 +210,7 @@ Like temporary attributes such as "imported_from", etc.. """
 
         #if cls.__name__ =='Service': import pdb; pdb.set_trace()
         for prop, tab in cls.properties.items():
-            #if prop == 'members' and cls.__name__ =='Hostgroup': import pdb; pdb.set_trace()
+            #if prop == 'members' and cls.__name__ =='Contactgroup': import pdb; pdb.set_trace()
             try:
                 new_val = dict_item[prop]
                 dict_item[prop] = tab.pythonize(new_val)

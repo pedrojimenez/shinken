@@ -687,7 +687,7 @@ class Config(Item):
         #    t.clean()
         #    timeperiods.append(t)
         # self.timeperiods = Timeperiods(timeperiods)
-
+        if type == "contactgroup": import pdb;pdb.set_trace()
         (cls, clss, prop) = types_creations[t]
         # List where we put objects
         lst = []
@@ -1606,11 +1606,15 @@ class Config(Item):
         to_pythonize = mycls.types_creations
 
         for t in to_pythonize:
+            clean_list = []
             for dict_item in raw_config[t]:
                 # Index 0 is the Object
                 # Example Host.pythonize(Host, {"host_name": ["myhostname"], ...})
                 cls = to_pythonize[t][0]
-                cls.pythonize(cls, dict_item)
+                clean_list.append(cls.pythonize(cls, dict_item))
+            raw_config[t] = clean_list
+
+        return raw_config
 
 
         #self.hosts.pythonize()

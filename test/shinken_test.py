@@ -163,7 +163,7 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         raw_objects = self.conf.read_config_buf(buf)
         import pdb
         pdb.set_trace()
-        self.conf.pythonize(Config, raw_objects)
+        raw_objects = self.conf.pythonize(Config, raw_objects)
         self.conf.create_objects_for_type(raw_objects, 'arbiter')
         self.conf.create_objects_for_type(raw_objects, 'module')
         self.conf.early_arbiter_linking()

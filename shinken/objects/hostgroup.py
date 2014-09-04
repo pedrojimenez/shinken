@@ -58,7 +58,10 @@ class Hostgroup(Itemgroup):
         return self.hostgroup_name
 
     def get_hosts(self):
-        return getattr(self, 'members', '')
+        if getattr(self, 'members', None) is not None:
+            return self.members
+        else:
+            return []
 
     def get_hostgroup_members(self):
         if self.has('hostgroup_members'):
@@ -119,7 +122,6 @@ class Hostgroups(Itemgroups):
             mbrs = hg.get_hosts()
             # The new member list, in id
             new_mbrs = []
-            import pdb; pdb.set_trace()
             for mbr in mbrs:
                 if mbr == '*':
                     new_mbrs.extend(hosts)
@@ -128,6 +130,7 @@ class Hostgroups(Itemgroups):
                     if h is not None:
                         new_mbrs.append(h)
                     else:
+                        import pdb; pdb.set_trace()
                         hg.add_string_unknown_member(mbr)
 
             # Make members uniq

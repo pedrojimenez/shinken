@@ -52,10 +52,10 @@ class Servicegroup(Itemgroup):
     }
 
     def get_services(self):
-        if self.has('members'):
+        if getattr(self, 'members', None) is not None:
             return self.members
         else:
-            return ''
+            return []
 
     def get_name(self):
         return self.servicegroup_name
