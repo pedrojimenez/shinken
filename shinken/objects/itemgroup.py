@@ -30,7 +30,7 @@
 from item import Item, Items
 
 from shinken.brok import Brok
-from shinken.property import StringProp, ListProp
+from shinken.property import StringProp, ListProp, ToGuessProp
 from shinken.log import logger
 
 
@@ -41,7 +41,7 @@ class Itemgroup(Item):
 
     properties = Item.properties.copy()
     properties.update({
-        'members': ListProp(fill_brok=['full_status'], default=None),
+        'members': ListProp(fill_brok=['full_status'], default=None, split_on_coma=True),
         # Shinken specific
         'unknown_members': ListProp(default=None),
     })
@@ -49,11 +49,24 @@ class Itemgroup(Item):
     def __init__(self, params={}):
         self.id = self.__class__.id
         self.__class__.id += 1
-
+        cls = self.__class__
         self.init_running_properties()
 
         for key in params:
-            setattr(self, key, params[key])
+
+            if key in self.properties:
+                val = self.properties[key].pythonize(params[key])
+            elif key in self.running_properties:
+                warning = "using a the running property %s in a config file" % key
+                self.configuration_warnings.append(warning)
+                val = self.running_properties[key].pythonize(params[key])
+            else:
+                warning = "Guessing the property %s type because it is not in %s object properties" % \
+                          (key, cls.__name__)
+                self.configuration_warnings.append(warning)
+                val = ToGuessProp.pythonize(params[key])
+
+            setattr(self, key, val)
 
 
     # Copy the groups properties EXCEPT the members

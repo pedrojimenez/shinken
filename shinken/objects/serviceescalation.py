@@ -69,6 +69,5 @@ class Serviceescalations(Items):
                 if hasattr(es, prop):
                     creation_dict[prop] = getattr(es, prop)
             #print "Creation an escalation with:", creation_dict
-            import pdb; pdb.set_trace()
             s = Escalation(creation_dict)
             escalations.add_escalation(s)

@@ -78,7 +78,7 @@ from shinken.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.pollerlink import PollerLink, PollerLinks
 from shinken.graph import Graph
 from shinken.log import logger
-from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp
+from shinken.property import UnusedProp, BoolProp, IntegerProp, CharProp, StringProp, LogLevelProp, ListProp, ToGuessProp
 from shinken.daemon import get_cur_user, get_cur_group
 
 no_longer_used_txt = 'This parameter is not longer take from the main file, but must be defined in the status_dat broker module instead. But Shinken will create you one if there are no present and use this parameter in it, so no worry.'
@@ -418,17 +418,28 @@ class Config(Item):
 
 
     def load_params(self, params):
-        var = self.clean_params(params)
-        self.params = Item.pythonize(Config, var)
+        clean_params = self.clean_params(params)
+        #self.params = Item.pythonize(Config, var)
 
-        for key, value in self.params.items():
-                setattr(self, key, value)
-                # Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
-                # so look at the first character. If it's a $, it's a variable
-                # and if it's end like it too
-                if key[0] == '$' and key[-1] == '$':
-                    macro_name = key[1:-1]
-                    self.resource_macros_names.append(macro_name)
+        for key, value in clean_params.items():
+
+            if key in self.properties:
+                val = self.properties[key].pythonize(clean_params[key])
+            elif key in self.running_properties:
+                logger.warning("using a the running property %s in a config file", key)
+                val = self.running_properties[key].pythonize(clean_params[key])
+            else:
+                logger.warning("Guessing the property %s type because it is not in %s object properties",
+                               key, self.__class__.__name__)
+                val = ToGuessProp.pythonize(clean_params[key])
+
+            setattr(self, key, val)
+            # Maybe it's a variable as $USER$ or $ANOTHERVATRIABLE$
+            # so look at the first character. If it's a $, it's a variable
+            # and if it's end like it too
+            if key[0] == '$' and key[-1] == '$':
+                macro_name = key[1:-1]
+                self.resource_macros_names.append(macro_name)
 
     def _cut_line(self, line):
         #punct = '"#$%&\'()*+/<=>?@[\\]^`{|}~'
@@ -625,7 +636,6 @@ class Config(Item):
         objects = {}
 
         #print "Params", params
-        import pdb; pdb.set_trace()
         self.load_params(params)
         # And then update our MACRO dict
         self.fill_resource_macros_names_macros()
@@ -687,7 +697,7 @@ class Config(Item):
         #    t.clean()
         #    timeperiods.append(t)
         # self.timeperiods = Timeperiods(timeperiods)
-        if type == "contactgroup": import pdb;pdb.set_trace()
+
         (cls, clss, prop) = types_creations[t]
         # List where we put objects
         lst = []
@@ -723,10 +733,6 @@ class Config(Item):
         self.arbiters.fill_default()
         self.modules.fill_default()
 
-        #print "****************** Pythonize ******************"
-        #self.arbiters.pythonize()
-
-        #self.modules.pythonize()
 
         #print "****************** Linkify ******************"
         self.arbiters.linkify(self.modules)
@@ -1063,11 +1069,11 @@ class Config(Item):
 
         #print "Servicedependency"
         self.servicedependencies.explode(self.hostgroups)
-        import pdb; pdb.set_trace()
+
         # Serviceescalations hostescalations will create new escalations
         self.serviceescalations.explode(self.escalations)
         self.hostescalations.explode(self.escalations)
-        import pdb; pdb.set_trace()
+
         self.escalations.explode(self.hosts, self.hostgroups,
                                  self.contactgroups)
 
@@ -1599,51 +1605,6 @@ class Config(Item):
         self.conf_is_correct = r
 
 
-    # We've got strings (like 1) but we want python elements, like True
-    @staticmethod
-    def pythonize(mycls, raw_config):
-        # call item pythonize for parameters
-        to_pythonize = mycls.types_creations
-
-        for t in to_pythonize:
-            clean_list = []
-            for dict_item in raw_config[t]:
-                # Index 0 is the Object
-                # Example Host.pythonize(Host, {"host_name": ["myhostname"], ...})
-                cls = to_pythonize[t][0]
-                clean_list.append(cls.pythonize(cls, dict_item))
-            raw_config[t] = clean_list
-
-        return raw_config
-
-
-        #self.hosts.pythonize()
-        #self.hostgroups.pythonize()
-        #self.hostdependencies.pythonize()
-        #self.contactgroups.pythonize()
-        #self.contacts.pythonize()
-        #self.notificationways.pythonize()
-        #self.checkmodulations.pythonize()
-        #self.macromodulations.pythonize()
-        #self.servicegroups.pythonize()
-        #self.services.pythonize()
-        #self.servicedependencies.pythonize()
-        #self.resultmodulations.pythonize()
-        #self.businessimpactmodulations.pythonize()
-        #self.escalations.pythonize()
-        #self.discoveryrules.pythonize()
-        #self.discoveryruns.pythonize()
-        #self.hostescalations.pythonize()
-        #self.serviceescalations.pythonize()
-        # The arbiters are already done
-        # self.arbiters.pythonize()
-        #self.schedulers.pythonize()
-        #self.realms.pythonize()
-        #self.reactionners.pythonize()
-        #self.pollers.pythonize()
-        #self.brokers.pythonize()
-        #self.receivers.pythonize()
-
     # Explode parameters like cached_service_check_horizon in the
     # Service class in a cached_check_horizon manner, o*hp commands
     # , etc
@@ -1669,15 +1630,6 @@ class Config(Item):
     # if they changed or not between the restart
     def compute_hash(self):
         self.hosts.compute_hash()
-        #self.contacts.pythonize()
-        #self.notificationways.pythonize()
-        #self.checkmodulations.pythonize()
-        #self.services.pythonize()
-        #self.resultmodulations.pythonize()
-        #self.businessimpactmodulations.pythonize()
-        #self.escalations.pythonize()
-        #self.discoveryrules.pythonize()
-        #self.discoveryruns.pythonize()
 
     # Add an error in the configuration error list so we can print them
     # all in one place

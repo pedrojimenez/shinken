@@ -25,7 +25,7 @@
 
 import re
 
-from shinken.util import to_float, to_split, to_char, to_int, unique_value
+from shinken.util import to_float, to_split, to_char, to_int, unique_value, list_split
 import logging
 
 __all__ = ['UnusedProp', 'BoolProp', 'IntegerProp', 'FloatProp',
@@ -58,7 +58,7 @@ class Property(object):
                  fill_brok=None, conf_send_preparation=None,
                  brok_transformation=None, retention=False,
                  retention_preparation=None, to_send=False,
-                 override=False, managed=True, split_on_coma=True, merging='uniq'):
+                 override=False, managed=True, split_on_coma=False, merging='uniq'):
 
         """
         `default`: default value to be used if this property is not set.
@@ -164,6 +164,8 @@ class BoolProp(Property):
 
     @staticmethod
     def pythonize(val):
+        if isinstance(val, bool):
+            return val
         val = unique_value(val)
         return _boolean_states[val.lower()]
 
@@ -217,7 +219,10 @@ class ListProp(Property):
 
     #@staticmethod
     def pythonize(self, val):
-        return to_split(val, self.split_on_coma)
+        if isinstance(val, list):
+            return list_split(val, self.split_on_coma)
+        else:
+            return to_split(val, self.split_on_coma)
 
 
 class LogLevelProp(StringProp):
@@ -286,3 +291,15 @@ class AddrProp(Property):
             addr['port'] = int(m.group(2))
 
         return addr
+
+class ToGuessProp(Property):
+    """Unknown property encountered while parsing"""
+
+    @staticmethod
+    def pythonize(val):
+        if isinstance(val, list) and len(set(val)) == 1:
+            # If we have a list with a unique value just use it
+            return val[0]
+        else:
+            # Well, can't choose to remove somthing.
+            return val

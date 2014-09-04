@@ -29,7 +29,6 @@ from shinken.util import get_obj_name
 from shinken.property import StringProp, IntegerProp
 from shinken.log import logger
 
-import pdb
 
 class Hostgroup(Itemgroup):
     id = 1  # zero is always a little bit special... like in database
@@ -130,7 +129,6 @@ class Hostgroups(Itemgroups):
                     if h is not None:
                         new_mbrs.append(h)
                     else:
-                        import pdb; pdb.set_trace()
                         hg.add_string_unknown_member(mbr)
 
             # Make members uniq

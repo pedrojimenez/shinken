@@ -121,7 +121,7 @@ class Service(SchedulingItem):
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':       IntegerProp(default=300, fill_brok=['full_status']),
         'merge_host_contacts':     BoolProp(default=False, fill_brok=['full_status']),
-        'labels':                  ListProp(default=None, fill_brok=['full_status'], merging='join'),
+        'labels':                  StringProp(default='', fill_brok=['full_status'], merging='join'),
         'host_dependency_enabled':  BoolProp(default=True, fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
@@ -1405,12 +1405,11 @@ class Services(Items):
             # Templates are useless here
             if not s.is_tpl():
                 if hasattr(s, 'service_dependencies'):
-                    if s.service_dependencies != '':
-                        sdeps = s.service_dependencies.split(',')
+                    if s.service_dependencies != []:
                         # %2=0 are for hosts, !=0 are for service_description
                         i = 0
                         hname = ''
-                        for elt in sdeps:
+                        for elt in s.service_dependencies:
                             if i % 2 == 0:  # host
                                 hname = elt.strip()
                             else:  # description

@@ -127,7 +127,7 @@ class Host(SchedulingItem):
         'time_to_orphanage':    IntegerProp(default=300, fill_brok=['full_status']),
         'service_overrides':    ListProp(default='', merging='duplicate', split_on_coma=False),
         'service_excludes':     ListProp(default='', merging='duplicate'),
-        'labels':               ListProp(default='', fill_brok=['full_status'], merging='join'),
+        'labels':               StringProp(default='', fill_brok=['full_status'], merging='join'),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template

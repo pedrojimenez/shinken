@@ -274,7 +274,7 @@ class Arbiter(Daemon):
         raw_objects = self.conf.read_config_buf(buf)
 
         # Pythonize values
-        self.conf.pythonize(buf, raw_objects)
+        #self.conf.pythonize(buf, raw_objects)
 
         logger.debug("Opening local log file")
 

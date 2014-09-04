@@ -249,6 +249,7 @@ def to_split(val, split_on_coma=True):
         val = []
     return val
 
+
 def list_split(val, split_on_coma=True):
     if not split_on_coma:
         return val

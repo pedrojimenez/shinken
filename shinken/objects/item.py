@@ -39,7 +39,7 @@ from copy import copy
 
 from shinken.graph import Graph
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, BoolProp, IntegerProp
+from shinken.property import StringProp, ListProp, BoolProp, IntegerProp, ToGuessProp
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -85,30 +85,43 @@ class Item(object):
         self.plus = {}  # for value with a +
 
         self.init_running_properties()
-
         # [0] = +  -> new key-plus
         # [0] = _  -> new custom entry in UPPER case
         for key in params:
+            # We want to create instance of object with the good type.
+            # Here we've just parsed config files so everything is a list.
+            # We use the pythonize method to get the good type.
+
+            if key in self.properties:
+                val = self.properties[key].pythonize(params[key])
+            elif key in self.running_properties:
+                warning = "using a the running property %s in a config file" % key
+                self.configuration_warnings.append(warning)
+                val = self.running_properties[key].pythonize(params[key])
+            else:
+                warning = "Guessing the property %s type because it is not in %s object properties" % \
+                          (key, cls.__name__)
+                self.configuration_warnings.append(warning)
+                val = ToGuessProp.pythonize(params[key])
+
             # checks for attribute value special syntax (+ or _)
 
-            if isinstance(params[key], str) and \
-               len(params[key]) >= 1 and params[key][0] == '+':
+            if isinstance(val, str) and len(val) >= 1 and val[0] == '+':
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
                 if key[0] == "_":
-                    self.plus[key.upper()] = params[key][1:]  # we remove the +
+                    self.plus[key.upper()] = val[1:]  # we remove the +
                 else:
-                    self.plus[key] = params[key][1:]  # we remove the +
+                    self.plus[key] = val[1:]   # we remove the +
             elif key[0] == "_":
-                if isinstance(params[key], list):
-                    import pdb;pdb.set_trace()
+                if isinstance(val, list):
                     err = "no support for _ syntax in multiple valued attributes"
                     self.configuration_errors.append(err)
                     continue
                 custom_name = key.upper()
-                self.customs[custom_name] = params[key][0]
+                self.customs[custom_name] = val
             else:
-                setattr(self, key, params[key])
+                setattr(self, key, val)
 
 
     # When values to set on attributes are unique (single element list),
@@ -200,31 +213,6 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # Make this method a classmethod
     load_global_conf = classmethod(load_global_conf)
-
-    @staticmethod
-    def pythonize(cls, dict_item):
-        """ We want to create instance of object with the good type.
-        Here we've just parsed config files so everything is a list.
-        We use the pythonize method to get the good type.
-        """
-
-        #if cls.__name__ =='Service': import pdb; pdb.set_trace()
-        for prop, tab in cls.properties.items():
-            #if prop == 'members' and cls.__name__ =='Contactgroup': import pdb; pdb.set_trace()
-            try:
-                new_val = dict_item[prop]
-                dict_item[prop] = tab.pythonize(new_val)
-
-            except KeyError, exp:
-                pass  # Catch it later
-            except ValueError, exp:
-                err = "incorrect type for property '%s' of '%s'" % (prop, cls.get_name())
-                if hasattr(dict_item, "configuration_errors"):
-                    dict_item["configuration_errors"].append(err)
-                else:
-                    dict_item["configuration_errors"] = [err]
-
-        return dict_item
 
 
     # Compute a hash of this element values. Should be launched
@@ -692,7 +680,6 @@ class Items(object):
     # We also create a twins list with id of twins (not the original
     # just the others, higher twins)
     def create_reversed_list(self):
-        #if self.__class__.__name__ == 'Hosts': import pdb; pdb.set_trace()
         self.reversed_list = {}
         self.twins = []
         name_property = self.__class__.name_property
@@ -704,8 +691,6 @@ class Items(object):
                     self.reversed_list[name] = id
                 else:
                     self.twins.append(id)
-
-        #if self.__class__.__name__ == 'Hosts': import pdb; pdb.set_trace()
 
 
     def find_id_by_name(self, name):
@@ -849,7 +834,9 @@ class Items(object):
         return r
 
     def remove_templates(self):
-        """ Remove useless templates (& properties) of our items ; otherwise we could get errors on config.is_correct() """
+        """ Remove useless templates (& properties) of our items
+        otherwise we could get errors on config.is_correct()
+        """
         tpls = [i for i in self if i.is_tpl()]
         for i in tpls:
             del self[i.id]
@@ -924,7 +911,6 @@ class Items(object):
     def linkify_with_contacts(self, contacts):
         for i in self:
             if hasattr(i, 'contacts'):
-                #contacts_tab = i.contacts.split(',')
                 contacts_tab = strip_and_uniq(i.contacts)
                 new_contacts = []
                 for c_name in contacts_tab:
@@ -1011,7 +997,7 @@ class Items(object):
                     # We add contacts into our contacts
                     if cnames != []:
                         if hasattr(i, 'contacts'):
-                            i.contacts += ',' + cnames
+                            i.contacts.extend(cnames)
                         else:
                             i.contacts = cnames
 
@@ -1213,7 +1199,7 @@ class Items(object):
     # Parent graph: use to find quickly relations between all item, and loop
     # return True if there is a loop
     def no_loop_in_parents(self, attr1, attr2):
-        """Find loop in dependencies.
+        """ Find loop in dependencies.
         For now, used with the following attributes :
             (self, parents) => host dependencies from host object
             (host_name, dependent_host_name) => host dependencies from hostdependencies object
