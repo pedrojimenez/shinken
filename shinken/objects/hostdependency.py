@@ -50,8 +50,8 @@ class Hostdependency(Item):
         'host_name':                     StringProp(),
         'hostgroup_name':                StringProp(default=''),
         'inherits_parent':               BoolProp(default=False),
-        'execution_failure_criteria':    ListProp(default=['n']),
-        'notification_failure_criteria': ListProp(default=['n']),
+        'execution_failure_criteria':    ListProp(default=['n'], split_on_coma=True),
+        'notification_failure_criteria': ListProp(default=['n'], split_on_coma=True),
         'dependency_period':             StringProp(default='')
     })
 
@@ -97,7 +97,7 @@ class Hostdependencies(Items):
                         err = "ERROR: the hostdependency got an unknown dependent_hostgroup_name '%s'" % dephg_name
                         hd.configuration_errors.append(err)
                         continue
-                    dephnames.extend(dephg.members.split(','))
+                    dephnames.extend(dephg.members)
 
             if hasattr(hd, 'dependent_host_name'):
                 dephnames.extend(hd.dependent_host_name.split(','))
@@ -113,7 +113,7 @@ class Hostdependencies(Items):
                         err = "ERROR: the hostdependency got an unknown hostgroup_name '%s'" % hg_name
                         hd.configuration_errors.append(err)
                         continue
-                    hnames.extend(hg.members.split(','))
+                    hnames.extend(hg.members)
 
             if hasattr(hd, 'host_name'):
                 hnames.extend(hd.host_name.split(','))

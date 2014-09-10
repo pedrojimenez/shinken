@@ -1411,6 +1411,7 @@ class SchedulingItem(Item):
     # Create the whole business rule tree
     # if we need it
     def create_business_rules(self, hosts, services, running=False):
+
         cmdCall = getattr(self, 'check_command', None)
 
         # If we do not have a command, we bailout

@@ -58,7 +58,7 @@ class Property(object):
                  fill_brok=None, conf_send_preparation=None,
                  brok_transformation=None, retention=False,
                  retention_preparation=None, to_send=False,
-                 override=False, managed=True, split_on_coma=False, merging='uniq'):
+                 override=False, managed=True, split_on_coma=True, merging='uniq'):
 
         """
         `default`: default value to be used if this property is not set.
@@ -166,8 +166,11 @@ class BoolProp(Property):
     def pythonize(val):
         if isinstance(val, bool):
             return val
-        val = unique_value(val)
-        return _boolean_states[val.lower()]
+        val = unique_value(val).lower()
+        if val in _boolean_states.keys():
+            return _boolean_states[val]
+        else:
+            raise PythonizeError("Cannot convert '%s' to a boolean value" % val)
 
 
 class IntegerProp(Property):
@@ -303,3 +306,8 @@ class ToGuessProp(Property):
         else:
             # Well, can't choose to remove somthing.
             return val
+
+
+class PythonizeError(Exception):
+    pass
+

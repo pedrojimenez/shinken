@@ -176,7 +176,6 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
         self.conf.linkify_templates()
         self.conf.apply_inheritance()
         self.conf.explode()
-        #self.conf.pythonize()
         #print "Aconf.services has %d elements" % len(self.conf.services)
         self.conf.create_reversed_list()
         self.conf.remove_twins()

@@ -42,7 +42,7 @@ class Serviceescalation(Item):
         'last_notification':     IntegerProp(),
         'notification_interval': IntegerProp(default=30), # like Nagios value
         'escalation_period':     StringProp(default=''),
-        'escalation_options':    StringProp(default='d,u,r,w,c'),
+        'escalation_options':    ListProp(default=['d','u','r','w','c'], split_on_coma=True),
         'contacts':              StringProp(),
         'contact_groups':        StringProp(),
         'first_notification_time': IntegerProp(),

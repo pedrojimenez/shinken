@@ -91,18 +91,18 @@ class Service(SchedulingItem):
         'low_flap_threshold':     IntegerProp(default=-1, fill_brok=['full_status']),
         'high_flap_threshold':    IntegerProp(default=-1, fill_brok=['full_status']),
         'flap_detection_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
-        'flap_detection_options': StringProp(default='o,w,c,u', fill_brok=['full_status']),
+        'flap_detection_options': ListProp(default=['o','w','c','u'], fill_brok=['full_status'], split_on_coma=True),
         'process_perf_data':      BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default=True, fill_brok=['full_status']),
         'notification_interval':  IntegerProp(default=60, fill_brok=['full_status']),
         'first_notification_delay': IntegerProp(default=0, fill_brok=['full_status']),
         'notification_period':    StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options':   StringProp(default='w,u,c,r,f,s', fill_brok=['full_status']),
+        'notification_options':   ListProp(default=['w','u','c','r','f','s'], fill_brok=['full_status'], split_on_coma=True),
         'notifications_enabled':  BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'contacts':               ListProp(default=[], brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
         'contact_groups':         ListProp(default=[], fill_brok=['full_status'], merging='join'),
-        'stalking_options':       StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'stalking_options':       ListProp(default=[''], fill_brok=['full_status'], merging='join'),
         'notes':                  StringProp(default='', fill_brok=['full_status']),
         'notes_url':              StringProp(default='', fill_brok=['full_status']),
         'action_url':             StringProp(default='', fill_brok=['full_status']),
@@ -117,11 +117,11 @@ class Service(SchedulingItem):
         'reactionner_tag':         StringProp(default='None'),
         'resultmodulations':       StringProp(default='', merging='join'),
         'business_impact_modulations':    StringProp(default='', merging='join'),
-        'escalations':             StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'escalations':             StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':       IntegerProp(default=300, fill_brok=['full_status']),
         'merge_host_contacts':     BoolProp(default=False, fill_brok=['full_status']),
-        'labels':                  StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'labels':                  ListProp(default=[], fill_brok=['full_status'], merging='join'),
         'host_dependency_enabled':  BoolProp(default=True, fill_brok=['full_status']),
 
         # BUSINESS CORRELATOR PART
@@ -132,11 +132,11 @@ class Service(SchedulingItem):
         # Treat downtimes as acknowledgements in smart notifications
         'business_rule_downtime_as_ack': BoolProp(default=False, fill_brok=['full_status']),
         # Enforces child nodes notification options
-        'business_rule_host_notification_options':    ListProp(default=None, fill_brok=['full_status']),
-        'business_rule_service_notification_options': ListProp(default=None, fill_brok=['full_status']),
+        'business_rule_host_notification_options':    ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
+        'business_rule_service_notification_options': ListProp(default=None, fill_brok=['full_status'], split_on_coma=True),
 
         # Easy Service dep definition
-        'service_dependencies':   ListProp(default=None, merging='join'), # TODO: find a way to brok it?
+        'service_dependencies':   ListProp(default=None, merging='join', split_on_coma=True), # TODO: find a way to brok it?
 
         # service generator
         'duplicate_foreach':       StringProp(default=''),
@@ -420,7 +420,6 @@ class Service(SchedulingItem):
         for prop, entry in cls.properties.items():
             if prop not in special_properties:
                 if not hasattr(self, prop) and entry.required:
-                    import pdb;pdb.set_trace()
                     logger.error("The service %s on host '%s' does not have %s", desc, hname, prop)
                     state = False  # Bad boy...
 
@@ -1405,10 +1404,13 @@ class Services(Items):
             # Templates are useless here
             if not s.is_tpl():
                 if hasattr(s, 'service_dependencies'):
+                    logger.error("SERVICES DEP : %s", s.service_dependencies)
+                    #import pdb;pdb.set_trace()
                     if s.service_dependencies != []:
                         # %2=0 are for hosts, !=0 are for service_description
                         i = 0
                         hname = ''
+                        #import pdb;pdb.set_trace()
                         for elt in s.service_dependencies:
                             if i % 2 == 0:  # host
                                 hname = elt.strip()
@@ -1419,6 +1421,7 @@ class Services(Items):
                                 if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                                     if hname == '':
                                         hname = s.host_name
+                                    #import pdb;pdb.set_trace()
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1
 

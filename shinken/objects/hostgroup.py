@@ -125,7 +125,7 @@ class Hostgroups(Itemgroups):
                 if mbr == '*':
                     new_mbrs.extend(hosts)
                 else:
-                    h = hosts.find_by_name(mbr)
+                    h = hosts.find_by_name(mbr.strip())
                     if h is not None:
                         new_mbrs.append(h)
                     else:

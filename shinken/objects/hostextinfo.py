@@ -130,7 +130,7 @@ class HostsExtInfo(Items):
     # Merge extended host information into host
     def merge(self, hosts):
         for ei in self:
-            hosts_names = ei.get_name().split(",")
+            hosts_names = ei.get_name()
             for host_name in hosts_names:
                 h = hosts.find_by_name(host_name)
                 if h is not None:

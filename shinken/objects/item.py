@@ -39,7 +39,7 @@ from copy import copy
 
 from shinken.graph import Graph
 from shinken.commandcall import CommandCall
-from shinken.property import StringProp, ListProp, BoolProp, IntegerProp, ToGuessProp
+from shinken.property import StringProp, ListProp, BoolProp, IntegerProp, ToGuessProp, PythonizeError
 from shinken.brok import Brok
 from shinken.util import strip_and_uniq
 from shinken.acknowledge import Acknowledge
@@ -53,7 +53,7 @@ class Item(object):
 
     properties = {
         'imported_from':            StringProp(default='unknown'),
-        'use':                      ListProp(default=None),
+        'use':                      ListProp(default=None, split_on_coma=True),
         'name':                     StringProp(default=''),
         'definition_order':         IntegerProp(default=100),
         # TODO: find why we can't uncomment this line below.
@@ -91,28 +91,41 @@ class Item(object):
             # We want to create instance of object with the good type.
             # Here we've just parsed config files so everything is a list.
             # We use the pythonize method to get the good type.
-
-            if key in self.properties:
-                val = self.properties[key].pythonize(params[key])
-            elif key in self.running_properties:
-                warning = "using a the running property %s in a config file" % key
-                self.configuration_warnings.append(warning)
-                val = self.running_properties[key].pythonize(params[key])
-            else:
-                warning = "Guessing the property %s type because it is not in %s object properties" % \
-                          (key, cls.__name__)
-                self.configuration_warnings.append(warning)
-                val = ToGuessProp.pythonize(params[key])
+            try:
+                if key in self.properties:
+                    val = self.properties[key].pythonize(params[key])
+                elif key in self.running_properties:
+                    warning = "using a the running property %s in a config file" % key
+                    self.configuration_warnings.append(warning)
+                    val = self.running_properties[key].pythonize(params[key])
+                elif hasattr(self, 'old_properties') and key in self.old_properties:
+                    val = self.properties[self.old_properties[key]].pythonize(params[key])
+                else:
+                    warning = "Guessing the property %s type because it is not in %s object properties" % \
+                              (key, cls.__name__)
+                    self.configuration_warnings.append(warning)
+                    val = ToGuessProp.pythonize(params[key])
+            except PythonizeError, e:
+                err = "Error while pythonizing parameter %s: %s" % (key, e)
+                self.configuration_errors.append(err)
+                continue
 
             # checks for attribute value special syntax (+ or _)
+            # we can have '+param' or ['+template1' , 'template2']
+            if (isinstance(val, str) and len(val) >= 1 and val[0] == '+') :
+                err = "A + value for a single string is not handled"
+                self.configuration_errors.append(err)
+                continue
 
-            if isinstance(val, str) and len(val) >= 1 and val[0] == '+':
+            if (isinstance(val, list) and isinstance(val[0], unicode) and len(val[0]) >= 1 and val[0][0] == '+'):
                 # Special case: a _MACRO can be a plus. so add to plus
                 # but upper the key for the macro name
+                val[0] = val[0][1:]
                 if key[0] == "_":
-                    self.plus[key.upper()] = val[1:]  # we remove the +
+
+                    self.plus[key.upper()] = val  # we remove the +
                 else:
-                    self.plus[key] = val[1:]   # we remove the +
+                    self.plus[key] = val   # we remove the +
             elif key[0] == "_":
                 if isinstance(val, list):
                     err = "no support for _ syntax in multiple valued attributes"
@@ -241,6 +254,8 @@ Like temporary attributes such as "imported_from", etc.. """
 
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
+        if prop == 'register':
+            return None  #We do not inherit from register
 
         # If I have the prop, I take mine but I check if I must
         # add a plus property
@@ -257,33 +272,43 @@ Like temporary attributes such as "imported_from", etc.. """
             # if property is in plus, add or replace it
             # Template should keep the '+' at the beginning of the chain
             if self.has_plus(prop):
-                value = self.get_plus_and_delete(prop) + ',' + value
+                value.insert(0, self.get_plus_and_delete(prop))
                 if self.is_tpl():
-                    value = '+' + value
+                    value = list(value)
+                    value.insert(0, '+')
+            #if self.__class__.__name__ == "Servicedependency":logger.error("RETURN : %s for prop %s on item %s which is a tpl %s", value, prop, self.id, self.is_tpl())
             return value
         # Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
         for i in self.templates:
             value = i.get_property_by_inheritance(items, prop)
 
-            if value is not None:
+            if value is not None and value != []:
                 # If our template give us a '+' value, we should continue to loop
                 still_loop = False
-                if isinstance(value, str) and value.startswith('+'):
+                if isinstance(value, list) and value[0] == '+':
                     # Templates should keep their + inherited from their parents
                     if not self.is_tpl():
+                        value = list(value)
                         value = value[1:]
                     still_loop = True
 
                 # Maybe in the previous loop, we set a value, use it too
                 if hasattr(self, prop):
                     # If the current value is strong, it will simplify the problem
-                    if not isinstance(value, list) and value.startswith('+'):
+                    if not isinstance(value, list) and value[0] == '+':
                         # In this case we can remove the + from our current
                         # tpl because our value will be final
-                        value = ','.join([getattr(self, prop), value[1:]])
+                        new_val = list(getattr(self, prop))
+                        new_val.extend(value[1:])
+                        value = new_val
+
                     else: # If not, se should keep the + sign of need
-                        value = ','.join([getattr(self, prop), value])
+                        new_val = list(getattr(self, prop))
+                        new_val.extend(value)
+                        value = new_val
+
+
 
 
                 # Ok, we can set it
@@ -294,11 +319,14 @@ Like temporary attributes such as "imported_from", etc.. """
                 if not still_loop:
                     # And set my own value in the end if need
                     if self.has_plus(prop):
-                        value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+                        value = list(value)
+                        value = list(getattr(self, prop))
+                        value.extend(self.get_plus_and_delete(prop))
                         # Template should keep their '+'
-                        if self.is_tpl() and not value.startswith('+'):
-                            value = '+' + value
+                        if self.is_tpl() and not value[0] == '+':
+                            value.insert(0, '+')
                         setattr(self, prop, value)
+                    #if self.__class__.__name__ == "Servicedependency": logger.error("RETURN1 : %s for prop %s on item %s which is a tpl %s", value, prop, self.id, self.is_tpl())
                     return value
 
         # Maybe templates only give us + values, so we didn't quit, but we already got a
@@ -310,19 +338,23 @@ Like temporary attributes such as "imported_from", etc.. """
         # add the already set self.prop value
         if self.has_plus(prop):
             if template_with_only_plus:
-                value = ','.join([getattr(self, prop), self.get_plus_and_delete(prop)])
+                value = list(getattr(self, prop))
+                value.extend(self.get_plus_and_delete(prop))
             else:
                 value = self.get_plus_and_delete(prop)
             # Template should keep their '+' chain
             # We must say it's a '+' value, so our son will now that it must
             # still loop
-            if self.is_tpl() and not value.startswith('+'):
-                value = '+' + value
+            if self.is_tpl() and value != [] and not value[0] == '+':
+                value.insert(0, '+')
+
             setattr(self, prop, value)
+            #if self.__class__.__name__ == "Servicedependency":logger.error("RETURN2 : %s for prop %s on item %s which is a tpl %s", value, prop, self.id, self.is_tpl())
             return value
 
         # Ok so in the end, we give the value we got if we have one, or None
         # Not even a plus... so None :)
+        #if self.__class__.__name__ == "Servicedependency":logger.error("RETURN3 : %s for prop %s on item %s which is a tpl %s", getattr(self, prop, None), prop, self.id, self.is_tpl())
         return getattr(self, prop, None)
 
 
@@ -337,12 +369,14 @@ Like temporary attributes such as "imported_from", etc.. """
                     else:
                         value = self.customs[prop]
                     if self.has_plus(prop):
-                        value = self.get_plus_and_delete(prop) + ',' + value
+                        value.insert(0, self.get_plus_and_delete(prop))
+                        #value = self.get_plus_and_delete(prop) + ',' + value
                     self.customs[prop] = value
         for prop in self.customs:
             value = self.customs[prop]
             if self.has_plus(prop):
-                value = self.get_plus_and_delete(prop) + ',' + value
+                value.insert(0, self.get_plus_and_delete(prop))
+                #value = self.get_plus_and_delete(prop) + ',' + value
                 self.customs[prop] = value
         # We can get custom properties in plus, we need to get all
         # entires and put
@@ -963,8 +997,8 @@ class Items(object):
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
             if hasattr(i, 'business_impact_modulations'):
-                #business_impact_modulations_tab = i.business_impact_modulations.split(',')
-                business_impact_modulations_tab = strip_and_uniq(i.business_impact_modulations)
+                business_impact_modulations_tab = i.business_impact_modulations.split(',')
+                business_impact_modulations_tab = strip_and_uniq(business_impact_modulations_tab)
                 new_business_impact_modulations = []
                 for rm_name in business_impact_modulations_tab:
                     rm = business_impact_modulations.find_by_name(rm_name)

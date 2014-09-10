@@ -27,7 +27,7 @@ import copy
 
 from item import Item
 from itemgroup import Itemgroup, Itemgroups
-from shinken.property import BoolProp, IntegerProp, StringProp, DictProp
+from shinken.property import BoolProp, IntegerProp, StringProp, DictProp, ListProp
 from shinken.log import logger
 
 # It change from hostgroup Class because there is no members
@@ -41,8 +41,8 @@ class Realm(Itemgroup):
     properties.update({
         'id':            IntegerProp(default=0, fill_brok=['full_status']),
         'realm_name':    StringProp(fill_brok=['full_status']),
-        'realm_members': StringProp(default=''), # No status_broker_name because it put hosts, not host_name
-        'higher_realms': StringProp(default=''),
+        'realm_members': ListProp(default=[], split_on_coma=True), # No status_broker_name because it put hosts, not host_name
+        'higher_realms': ListProp(default=[], split_on_coma=True),
         'default':       BoolProp(default=False),
         'broker_complete_links':       BoolProp(default=False),
         #'alias': {'required':  True, 'fill_brok': ['full_status']},

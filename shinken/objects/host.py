@@ -69,8 +69,8 @@ class Host(SchedulingItem):
         'alias':                StringProp(fill_brok=['full_status']),
         'display_name':         StringProp(default='', fill_brok=['full_status']),
         'address':              StringProp(fill_brok=['full_status']),
-        'parents':              ListProp(brok_transformation=to_hostnames_list, default='', fill_brok=['full_status'], merging='join'),
-        'hostgroups':           StringProp(brok_transformation=to_list_string_of_names, default='', fill_brok=['full_status'], merging='join'),
+        'parents':              ListProp(brok_transformation=to_hostnames_list, default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'hostgroups':           ListProp(brok_transformation=to_list_string_of_names, default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'check_command':        StringProp(default='_internal_host_up', fill_brok=['full_status']),
         'initial_state':        CharProp(default='u', fill_brok=['full_status']),
         'max_check_attempts':   IntegerProp(default=1,fill_brok=['full_status']),
@@ -87,18 +87,18 @@ class Host(SchedulingItem):
         'low_flap_threshold':   IntegerProp(default=25, fill_brok=['full_status']),
         'high_flap_threshold':  IntegerProp(default=50, fill_brok=['full_status']),
         'flap_detection_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
-        'flap_detection_options': StringProp(default='o,d,u', fill_brok=['full_status'], merging='join'),
+        'flap_detection_options': ListProp(default=['o','d','u'], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'process_perf_data':    BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'retain_status_information': BoolProp(default=True, fill_brok=['full_status']),
         'retain_nonstatus_information': BoolProp(default=True, fill_brok=['full_status']),
-        'contacts':             ListProp(default=[], brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join'),
-        'contact_groups':       ListProp(default=[], fill_brok=['full_status'], merging='join'),
+        'contacts':             ListProp(default=[], brok_transformation=to_list_of_names, fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'contact_groups':       ListProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'notification_interval': IntegerProp(default=60, fill_brok=['full_status']),
         'first_notification_delay': IntegerProp(default=0, fill_brok=['full_status']),
         'notification_period':  StringProp(brok_transformation=to_name_if_possible, fill_brok=['full_status']),
-        'notification_options': StringProp(default='d,u,r,f', fill_brok=['full_status'], merging='join'),
+        'notification_options': ListProp(default=['d','u','r','f'], fill_brok=['full_status'], merging='join',split_on_coma=True),
         'notifications_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
-        'stalking_options':     StringProp(default='', fill_brok=['full_status']),
+        'stalking_options':     ListProp(default=[''], fill_brok=['full_status']),
         'notes':                StringProp(default='', fill_brok=['full_status']),
         'notes_url':            StringProp(default='', fill_brok=['full_status']),
         'action_url':           StringProp(default='', fill_brok=['full_status']),
@@ -122,12 +122,12 @@ class Host(SchedulingItem):
         'reactionner_tag':      StringProp(default='None'),
         'resultmodulations':    StringProp(default='', merging='join'),
         'business_impact_modulations': StringProp(default='', merging='join'),
-        'escalations':          StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'escalations':          StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':    IntegerProp(default=300, fill_brok=['full_status']),
-        'service_overrides':    ListProp(default='', merging='duplicate', split_on_coma=False),
-        'service_excludes':     ListProp(default='', merging='duplicate'),
-        'labels':               StringProp(default='', fill_brok=['full_status'], merging='join'),
+        'service_overrides':    ListProp(default=[], merging='duplicate', split_on_coma=False),
+        'service_excludes':     ListProp(default=[], merging='duplicate', split_on_coma=True),
+        'labels':               StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
 
         # BUSINESS CORRELATOR PART
         # Business rules output format template
@@ -193,16 +193,16 @@ class Host(SchedulingItem):
         'flapping_comment_id':  IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         # No broks for _depend_of because of to much links to hosts/services
         # dependencies for actions like notif of event handler, so AFTER check return
-        'act_depend_of':        StringProp(default=[]),
+        'act_depend_of':        ListProp(default=[]),
 
         # dependencies for checks raise, so BEFORE checks
-        'chk_depend_of':        StringProp(default=[]),
+        'chk_depend_of':        ListProp(default=[]),
 
         # elements that depend of me, so the reverse than just upper
-        'act_depend_of_me':     StringProp(default=[]),
+        'act_depend_of_me':     ListProp(default=[]),
 
         # elements that depend of me
-        'chk_depend_of_me':     StringProp(default=[]),
+        'chk_depend_of_me':     ListProp(default=[]),
         'last_state_update':    StringProp(default=0, fill_brok=['full_status'], retention=True),
 
         # no brok ,to much links
@@ -603,6 +603,7 @@ class Host(SchedulingItem):
     # Add a dependency for check (so before launch)
     def add_host_chk_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
+        #import pdb; pdb.set_trace()
         self.chk_depend_of.append((h, status, 'logic_dep', timeperiod, inherits_parent))
         # And I add me in it's list
         h.chk_depend_of_me.append((self, status, 'logic_dep', timeperiod, inherits_parent))

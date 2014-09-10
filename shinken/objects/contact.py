@@ -26,7 +26,7 @@
 from item import Item, Items
 
 from shinken.util import strip_and_uniq
-from shinken.property import BoolProp, IntegerProp, StringProp
+from shinken.property import BoolProp, IntegerProp, StringProp, ListProp
 from shinken.log import logger, naglog_result
 
 _special_properties = ('service_notification_commands', 'host_notification_commands',
@@ -48,13 +48,13 @@ class Contact(Item):
     properties.update({
         'contact_name':     StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='none', fill_brok=['full_status']),
-        'contactgroups':    StringProp(default='', fill_brok=['full_status']),
+        'contactgroups':    ListProp(default=[], fill_brok=['full_status']),
         'host_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
         'service_notifications_enabled': BoolProp(default=True, fill_brok=['full_status']),
         'host_notification_period': StringProp(fill_brok=['full_status']),
         'service_notification_period': StringProp(fill_brok=['full_status']),
-        'host_notification_options': StringProp(fill_brok=['full_status']),
-        'service_notification_options': StringProp(fill_brok=['full_status']),
+        'host_notification_options': ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
+        'service_notification_options': ListProp(default=[''], fill_brok=['full_status'], split_on_coma=True),
         'host_notification_commands': StringProp(fill_brok=['full_status']),
         'service_notification_commands': StringProp(fill_brok=['full_status']),
         'min_business_impact':    IntegerProp(default=0, fill_brok=['full_status']),
@@ -278,7 +278,7 @@ class Contacts(Items):
                         params[p] = getattr(c, p)
                     else:  # put a default text value
                         # Remove the value and put a default value
-                        setattr(c, p, '')
+                        setattr(c, p, c.properties[p].default)
 
 
                 if need_notificationway:

@@ -1755,7 +1755,6 @@ class ExternalCommandManager:
         t = {'poller_name': poller_name, 'address': address, 'port': port}
         p = PollerLink(t)
         p.fill_default()
-        p.pythonize()
         p.prepare_for_conf()
         parameters = {'max_plugins_output_length': self.conf.max_plugins_output_length}
         p.add_global_conf_parameters(parameters)

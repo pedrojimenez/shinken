@@ -107,7 +107,7 @@ class Timeperiod(Item):
     properties.update({
         'timeperiod_name':  StringProp(fill_brok=['full_status']),
         'alias':            StringProp(default='', fill_brok=['full_status']),
-        'use':              StringProp(default=''),
+        'use':              StringProp(default=None),
         'register':         IntegerProp(default=1),
 
         # These are needed if a broker module calls methods on timeperiod objects

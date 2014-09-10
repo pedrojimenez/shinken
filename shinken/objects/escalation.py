@@ -48,9 +48,9 @@ class Escalation(Item):
         # the escalation, but the one defined by the object
         'notification_interval': IntegerProp(default=-1),
         'escalation_period':    StringProp(default=''),
-        'escalation_options':   StringProp(default='d,u,r,w,c'),
-        'contacts':             StringProp(),
-        'contact_groups':       StringProp(),
+        'escalation_options':   ListProp(default=['d','u','r','w','c'], split_on_coma=True),
+        'contacts':             ListProp(default=[], split_on_coma=True),
+        'contact_groups':       ListProp(default=[], split_on_coma=True),
     })
 
     running_properties = Item.running_properties.copy()
