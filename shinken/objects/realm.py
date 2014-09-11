@@ -80,19 +80,6 @@ class Realm(Itemgroup):
         else:
             return []
 
-    # Use to make python properties
-    # TODO: change itemgroup function pythonize?
-    #def pythonize(self):
-    #    cls = self.__class__
-    #    for prop, tab in cls.properties.items():
-    #        try:
-    #            old_val = getattr(self, prop)
-    #            new_val = tab.pythonize(old_val)
-    #            #print "Changing ", old_val, "by", new_val
-    #            setattr(self, prop, new_val)
-    #        except AttributeError, exp:
-    #            pass  # Will be catch at the is_correct moment
-
 
     # We fillfull properties with template ones if need
     # Because hostgroup we call may not have it's members

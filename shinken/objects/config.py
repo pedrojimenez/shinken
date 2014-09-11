@@ -709,9 +709,6 @@ class Config(Item):
         setattr(self, prop, clss(lst))
 
 
-
-
-
     # Here arbiter and modules objects should be prepare and link
     # before all others types
     def early_arbiter_linking(self):

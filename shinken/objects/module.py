@@ -58,7 +58,6 @@ class Modules(Items):
     def linkify_s_by_plug(self):
         for s in self:
             new_modules = []
-            #mods = s.modules.split(',')
             mods = strip_and_uniq(s.modules)
             for plug_name in mods:
                 plug_name = plug_name.strip()

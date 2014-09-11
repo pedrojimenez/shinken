@@ -1244,8 +1244,6 @@ class Services(Items):
         # We check for all Host properties if the host has it
         # if not, it check all host templates for a value
         for prop in Service.properties:
-            if prop == 'register':
-                continue  #We do not want to inherit this prop
             self.apply_partial_inheritance(prop)
 
         # Then implicit inheritance

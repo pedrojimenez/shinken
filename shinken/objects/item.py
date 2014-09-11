@@ -255,7 +255,7 @@ Like temporary attributes such as "imported_from", etc.. """
     # We fillfull properties with template ones if need
     def get_property_by_inheritance(self, items, prop):
         if prop == 'register':
-            return None  #We do not inherit from register
+            return None  # We do not inherit from register
 
         # If I have the prop, I take mine but I check if I must
         # add a plus property
@@ -276,7 +276,6 @@ Like temporary attributes such as "imported_from", etc.. """
                 if self.is_tpl():
                     value = list(value)
                     value.insert(0, '+')
-            #if self.__class__.__name__ == "Servicedependency":logger.error("RETURN : %s for prop %s on item %s which is a tpl %s", value, prop, self.id, self.is_tpl())
             return value
         # Ok, I do not have prop, Maybe my templates do?
         # Same story for plus
@@ -326,7 +325,6 @@ Like temporary attributes such as "imported_from", etc.. """
                         if self.is_tpl() and not value[0] == '+':
                             value.insert(0, '+')
                         setattr(self, prop, value)
-                    #if self.__class__.__name__ == "Servicedependency": logger.error("RETURN1 : %s for prop %s on item %s which is a tpl %s", value, prop, self.id, self.is_tpl())
                     return value
 
         # Maybe templates only give us + values, so we didn't quit, but we already got a
@@ -349,12 +347,10 @@ Like temporary attributes such as "imported_from", etc.. """
                 value.insert(0, '+')
 
             setattr(self, prop, value)
-            #if self.__class__.__name__ == "Servicedependency":logger.error("RETURN2 : %s for prop %s on item %s which is a tpl %s", value, prop, self.id, self.is_tpl())
             return value
 
         # Ok so in the end, we give the value we got if we have one, or None
         # Not even a plus... so None :)
-        #if self.__class__.__name__ == "Servicedependency":logger.error("RETURN3 : %s for prop %s on item %s which is a tpl %s", getattr(self, prop, None), prop, self.id, self.is_tpl())
         return getattr(self, prop, None)
 
 
@@ -376,7 +372,6 @@ Like temporary attributes such as "imported_from", etc.. """
             value = self.customs[prop]
             if self.has_plus(prop):
                 value.insert(0, self.get_plus_and_delete(prop))
-                #value = self.get_plus_and_delete(prop) + ',' + value
                 self.customs[prop] = value
         # We can get custom properties in plus, we need to get all
         # entires and put
@@ -914,8 +909,6 @@ class Items(object):
         # if not, it check all host templates for a value
         cls = self.inner_class
         for prop in cls.properties:
-            if prop == 'register':
-                continue  #We do not want to inherit this prop
             self.apply_partial_inheritance(prop)
         for i in self:
             i.get_customs_properties_by_inheritance(self)
@@ -966,7 +959,6 @@ class Items(object):
     def linkify_with_escalations(self, escalations):
         for i in self:
             if hasattr(i, 'escalations'):
-                #escalations_tab = i.escalations.split(',')
                 escalations_tab = strip_and_uniq(i.escalations)
                 new_escalations = []
                 for es_name in [e for e in escalations_tab if e != '']:
@@ -982,7 +974,6 @@ class Items(object):
     def linkify_with_resultmodulations(self, resultmodulations):
         for i in self:
             if hasattr(i, 'resultmodulations'):
-                #resultmodulations_tab = i.resultmodulations.split(',')
                 resultmodulations_tab = strip_and_uniq(i.resultmodulations)
                 new_resultmodulations = []
                 for rm_name in resultmodulations_tab:
@@ -999,7 +990,6 @@ class Items(object):
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
             if hasattr(i, 'business_impact_modulations'):
-                #business_impact_modulations_tab = i.business_impact_modulations.split(',')
                 business_impact_modulations_tab = strip_and_uniq(i.business_impact_modulations)
                 new_business_impact_modulations = []
                 for rm_name in business_impact_modulations_tab:
@@ -1018,6 +1008,7 @@ class Items(object):
     def explode_contact_groups_into_contacts(self, contactgroups):
         for i in self:
             if hasattr(i, 'contact_groups'):
+                # TODO : See if we can remove this if
                 if isinstance(i.contact_groups, list):
                     cgnames = i.contact_groups
                 else:

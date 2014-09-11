@@ -273,9 +273,6 @@ class Arbiter(Daemon):
         buf = self.conf.read_config(self.config_files)
         raw_objects = self.conf.read_config_buf(buf)
 
-        # Pythonize values
-        #self.conf.pythonize(buf, raw_objects)
-
         logger.debug("Opening local log file")
 
         # First we need to get arbiters and modules
