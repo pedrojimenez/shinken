@@ -115,9 +115,9 @@ class Service(SchedulingItem):
         # Shinken specific
         'poller_tag':              StringProp(default='None'),
         'reactionner_tag':         StringProp(default='None'),
-        'resultmodulations':       StringProp(default='', merging='join'),
-        'business_impact_modulations':    StringProp(default='', merging='join'),
-        'escalations':             StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'resultmodulations':       ListProp(default=[], merging='join'),
+        'business_impact_modulations':    ListProp(default=[], merging='join'),
+        'escalations':             ListProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'maintenance_period':      StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':       IntegerProp(default=300, fill_brok=['full_status']),
         'merge_host_contacts':     BoolProp(default=False, fill_brok=['full_status']),
@@ -580,13 +580,14 @@ class Service(SchedulingItem):
                                 safe_key_value = re.sub(r'[' + "`~!$%^&*\"|'<>?,()=" + ']+', '_', key_value[key])
                                 new_s.service_description = self.service_description.replace('$' + key + '$', safe_key_value)
                         # Here is a list of property where we will expand the $KEY$ by the value
-                        _the_expandables = ['check_command', 'aggregation', 'service_dependencies', 'event_handler']
+                        _the_expandables = ['check_command', 'aggregation', 'event_handler']
                         for prop in _the_expandables:
                             if hasattr(self, prop):
                                 # here we can replace VALUE, VALUE1, VALUE2,...
                                 setattr(new_s, prop, getattr(new_s, prop).replace('$' + key + '$', key_value[key]))
-                        if hasattr(self, 'aggregation'):
-                            new_s.aggregation = new_s.aggregation.replace('$' + key + '$', key_value[key])
+                        if hasattr(self, 'service_dependencies'):
+                            for i, sd in enumerate(new_s.service_dependencies):
+                                new_s.service_dependencies[i] = sd.replace('$' + key + '$', key_value[key])
                     # And then add in our list this new service
                     duplicates.append(new_s)
             else:
@@ -1155,7 +1156,10 @@ class Services(Items):
                     err = "Error: trying to override '%s', a forbidden property for service '%s'" % (prop, name)
                     host.configuration_errors.append(err)
                     continue
-                setattr(service, prop, value)
+
+                # Pythonize the value because here value is str.
+                setattr(service,prop, service.properties[prop].pythonize(value))
+
 
     # We can link services with hosts so
     # We can search in O(hosts) instead
@@ -1404,8 +1408,6 @@ class Services(Items):
             # Templates are useless here
             if not s.is_tpl():
                 if hasattr(s, 'service_dependencies'):
-                    logger.error("SERVICES DEP : %s", s.service_dependencies)
-                    #import pdb;pdb.set_trace()
                     if s.service_dependencies != []:
                         # %2=0 are for hosts, !=0 are for service_description
                         i = 0

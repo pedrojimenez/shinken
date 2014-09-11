@@ -91,6 +91,7 @@ class Item(object):
             # We want to create instance of object with the good type.
             # Here we've just parsed config files so everything is a list.
             # We use the pythonize method to get the good type.
+            #if key == 'hostgroups': import pdb;pdb.set_trace()
             try:
                 if key in self.properties:
                     val = self.properties[key].pythonize(params[key])
@@ -660,10 +661,12 @@ Like temporary attributes such as "imported_from", etc.. """
     # Link with triggers. Can be with a "in source" trigger, or a file name
     def linkify_with_triggers(self, triggers):
         # Get our trigger string and trigger names in the same list
-        self.triggers.extend(self.trigger_name)
+        self.triggers.extend([self.trigger_name])
         #print "I am linking my triggers", self.get_full_name(), self.triggers
         new_triggers = []
         for tname in self.triggers:
+            if tname == '':
+                continue
             t = triggers.find_by_name(tname)
             if t:
                 setattr(t, 'trigger_broker_raise_enabled', self.trigger_broker_raise_enabled)
@@ -997,8 +1000,8 @@ class Items(object):
     def linkify_with_business_impact_modulations(self, business_impact_modulations):
         for i in self:
             if hasattr(i, 'business_impact_modulations'):
-                business_impact_modulations_tab = i.business_impact_modulations.split(',')
-                business_impact_modulations_tab = strip_and_uniq(business_impact_modulations_tab)
+                #business_impact_modulations_tab = i.business_impact_modulations.split(',')
+                business_impact_modulations_tab = strip_and_uniq(i.business_impact_modulations)
                 new_business_impact_modulations = []
                 for rm_name in business_impact_modulations_tab:
                     rm = business_impact_modulations.find_by_name(rm_name)

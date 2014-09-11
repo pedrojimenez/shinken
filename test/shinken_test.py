@@ -175,7 +175,9 @@ class ShinkenTest(unittest.TestCase, _Unittest2CompatMixIn):
 
         self.conf.linkify_templates()
         self.conf.apply_inheritance()
+        #import pdb;pdb.set_trace()
         self.conf.explode()
+        #import pdb;pdb.set_trace()
         #print "Aconf.services has %d elements" % len(self.conf.services)
         self.conf.create_reversed_list()
         self.conf.remove_twins()

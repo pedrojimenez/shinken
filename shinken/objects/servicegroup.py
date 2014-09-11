@@ -119,7 +119,7 @@ class Servicegroups(Itemgroups):
             new_mbrs = []
             seek = 0
             host_name = ''
-            if (len(mbrs) == 1):
+            if len(mbrs) == 1 and mbrs[0] != '':
                 sg.add_string_unknown_member('%s' % mbrs[0])
 
             for mbr in mbrs:

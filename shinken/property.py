@@ -307,6 +307,12 @@ class ToGuessProp(Property):
             # Well, can't choose to remove somthing.
             return val
 
+class IntListProp(ListProp):
+    """Integer List property"""
+    def pythonize(self, val):
+        super(IntListProp, self).pythonize(val)
+        return [int(e) for e in val]
+
 
 class PythonizeError(Exception):
     pass

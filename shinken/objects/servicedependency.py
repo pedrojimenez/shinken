@@ -102,7 +102,7 @@ class Servicedependencies(Items):
                 self.configuration_errors.append(err)
                 continue
             hnames = []
-            hnames.extend(hg.members.split(','))
+            hnames.extend(hg.members)
             for hname in hnames:
                 for dep_sname in dep_snames:
                     for sname in snames:
@@ -144,7 +144,7 @@ class Servicedependencies(Items):
                         err = "ERROR: the servicedependecy got an unknown hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
-                    hnames.extend(hg.members.split(','))
+                    hnames.extend(hg.members)
 
             if not hasattr(sd, 'host_name'):
                 sd.host_name = ''
@@ -171,7 +171,7 @@ class Servicedependencies(Items):
                         err = "ERROR: the servicedependecy got an unknown dependent_hostgroup_name '%s'" % hg_name
                         hg.configuration_errors.append(err)
                         continue
-                    dep_hnames.extend(hg.members.split(','))
+                    dep_hnames.extend(hg.members)
 
             if not hasattr(sd, 'dependent_host_name'):
                 sd.dependent_host_name = getattr(sd, 'host_name', '')

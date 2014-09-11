@@ -120,9 +120,9 @@ class Host(SchedulingItem):
         'realm':                StringProp(default=None, fill_brok=['full_status'], conf_send_preparation=get_obj_name),
         'poller_tag':           StringProp(default='None'),
         'reactionner_tag':      StringProp(default='None'),
-        'resultmodulations':    StringProp(default='', merging='join'),
-        'business_impact_modulations': StringProp(default='', merging='join'),
-        'escalations':          StringProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
+        'resultmodulations':    ListProp(default=[], merging='join'),
+        'business_impact_modulations': ListProp(default=[], merging='join'),
+        'escalations':          ListProp(default=[], fill_brok=['full_status'], merging='join', split_on_coma=True),
         'maintenance_period':   StringProp(default='', brok_transformation=to_name_if_possible, fill_brok=['full_status']),
         'time_to_orphanage':    IntegerProp(default=300, fill_brok=['full_status']),
         'service_overrides':    ListProp(default=[], merging='duplicate', split_on_coma=False),
@@ -1098,8 +1098,8 @@ class Hosts(Items):
         for h in self:
             if not h.is_tpl():
                 new_hostgroups = []
-                if hasattr(h, 'hostgroups') and h.hostgroups != '':
-                    hgs = h.hostgroups.split(',')
+                if hasattr(h, 'hostgroups') and h.hostgroups != []:
+                    hgs = h.hostgroups
                     for hg_name in hgs:
                         hg_name = hg_name.strip()
                         hg = hostgroups.find_by_name(hg_name)
@@ -1122,10 +1122,7 @@ class Hosts(Items):
             if not h.is_tpl() and hasattr(h, 'host_name'):
                 hname = h.host_name
                 if hasattr(h, 'hostgroups'):
-                    if isinstance(h.hostgroups, list):
-                        h.hostgroups = ','.join(h.hostgroups)
-                    hgs = h.hostgroups.split(',')
-                    for hg in hgs:
+                    for hg in h.hostgroups:
                         hostgroups.add_member(hname, hg.strip())
 
         # items::explode_contact_groups_into_contacts

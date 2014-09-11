@@ -136,7 +136,7 @@ class Timeperiod(Item):
                     params[key] = ''
 
             if key in ['name', 'alias', 'timeperiod_name', 'exclude', 'use', 'register', 'imported_from', 'is_active', 'dateranges']:
-                setattr(self, key, params[key])
+                setattr(self, key, self.properties[key].pythonize(params[key]))
             else:
                 self.unresolved.append(key + ' ' + params[key])
 
@@ -645,9 +645,9 @@ class Timeperiod(Item):
     # Will make tp in exclude with id of the timeperiods
     def linkify(self, timeperiods):
         new_exclude = []
-        if self.has('exclude') and self.exclude != '':
+        if self.has('exclude') and self.exclude != []:
             logger.debug("[timeentry::%s] have excluded %s", self.get_name(), self.exclude)
-            excluded_tps = self.exclude.split(',')
+            excluded_tps = self.exclude
             #print "I will exclude from:", excluded_tps
             for tp_name in excluded_tps:
                 tp = timeperiods.find_by_name(tp_name.strip())

@@ -184,6 +184,7 @@ class Hostgroups(Itemgroups):
     # if the host group do not exist, create it
     def add_member(self, hname, hgname):
         hg = self.find_by_name(hgname)
+        #import pdb; pdb.set_trace()
         # if the id do not exist, create the hg
         if hg is None:
             hg = Hostgroup({'hostgroup_name': hgname, 'alias': hgname, 'members': hname})
