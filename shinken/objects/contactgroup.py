@@ -129,7 +129,6 @@ class Contactgroups(Itemgroups):
                 if m is not None:
                     new_mbrs.append(m)
                 else:
-                    import pdb;pdb.set_trace()
                     cg.add_string_unknown_member(mbr)
 
             # Make members uniq

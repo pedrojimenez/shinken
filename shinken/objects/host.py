@@ -603,7 +603,6 @@ class Host(SchedulingItem):
     # Add a dependency for check (so before launch)
     def add_host_chk_dependency(self, h, status, timeperiod, inherits_parent):
         # I add him in MY list
-        #import pdb; pdb.set_trace()
         self.chk_depend_of.append((h, status, 'logic_dep', timeperiod, inherits_parent))
         # And I add me in it's list
         h.chk_depend_of_me.append((self, status, 'logic_dep', timeperiod, inherits_parent))

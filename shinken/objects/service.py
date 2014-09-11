@@ -1412,7 +1412,6 @@ class Services(Items):
                         # %2=0 are for hosts, !=0 are for service_description
                         i = 0
                         hname = ''
-                        #import pdb;pdb.set_trace()
                         for elt in s.service_dependencies:
                             if i % 2 == 0:  # host
                                 hname = elt.strip()
@@ -1423,7 +1422,6 @@ class Services(Items):
                                 if hasattr(s, 'service_description') and hasattr(s, 'host_name'):
                                     if hname == '':
                                         hname = s.host_name
-                                    #import pdb;pdb.set_trace()
                                     servicedependencies.add_service_dependency(s.host_name, s.service_description, hname, desc)
                             i += 1
 

@@ -91,7 +91,6 @@ class Item(object):
             # We want to create instance of object with the good type.
             # Here we've just parsed config files so everything is a list.
             # We use the pythonize method to get the good type.
-            #if key == 'hostgroups': import pdb;pdb.set_trace()
             try:
                 if key in self.properties:
                     val = self.properties[key].pythonize(params[key])
